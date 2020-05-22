@@ -1,4 +1,4 @@
-# formvuelatte-plugin-lookup
+# @formvuelatte/plugin-lookup
 
 Lookup plugin for FormVueLatte
 
