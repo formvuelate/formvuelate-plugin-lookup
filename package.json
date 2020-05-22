@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "FormVueLatte Lookup plugin",
   "main": "dist/formvuelatte-plugin-lookup.cjs.js",
+  "private": false,
   "repository": {
     "type": "git",
     "url": "git+ssh://git@github.com/vuelidate/formvuelatte-plugin-lookup.git"
