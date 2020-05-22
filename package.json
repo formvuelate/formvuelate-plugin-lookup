@@ -4,6 +4,9 @@
   "description": "FormVueLatte Lookup plugin",
   "main": "dist/formvuelatte-plugin-lookup.cjs.js",
   "private": false,
+  "publishConfig": {
+    "access": "public"
+  },
   "repository": {
     "type": "git",
     "url": "git+ssh://git@github.com/vuelidate/formvuelatte-plugin-lookup.git"
