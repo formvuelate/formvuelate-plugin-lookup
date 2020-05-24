@@ -1,6 +1,6 @@
 {
   "name": "@formvuelatte/plugin-lookup",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "FormVueLatte Lookup plugin",
   "main": "dist/formvuelatte-plugin-lookup.cjs.js",
   "private": false,
