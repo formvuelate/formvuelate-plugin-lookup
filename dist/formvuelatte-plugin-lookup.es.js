@@ -1,5 +1,5 @@
 /**
- * @formvuelatte/plugin-lookup v1.0.0
+ * @formvuelatte/plugin-lookup v1.0.1
  * (c) 2020 Marina Mosti <marina@mosti.com.mx>
  * @license MIT
  */
@@ -3252,60 +3252,69 @@ var rendererOptions = Object.assign({}, {patchProp: patchProp},
 
 var unwrap = function (v) { return isRef(v) ? v.value : v; };
 
+/**
+ * LookupPlugin
+ * @param {String} prop0.componentProp - Main property that holds the component definition
+ * @param {Object} prop0.mapComponents - Key value pair of component mapping
+ * @param {Object} prop0.mapProps - Key value pair of prop mapping
+ *
+ * @returns {Function}
+ */
 function LookupPlugin (ref) {
-    var componentProp = ref.componentProp; if ( componentProp === void 0 ) componentProp = 'component';
-    var mapComponents = ref.mapComponents; if ( mapComponents === void 0 ) mapComponents = {};
-    var mapProps = ref.mapProps; if ( mapProps === void 0 ) mapProps = {};
+  var componentProp = ref.componentProp; if ( componentProp === void 0 ) componentProp = 'component';
+  var mapComponents = ref.mapComponents; if ( mapComponents === void 0 ) mapComponents = {};
+  var mapProps = ref.mapProps; if ( mapProps === void 0 ) mapProps = {};
 
-    return function (baseReturns, props) {
-        var parsedSchema = baseReturns.parsedSchema;
-        var replacedProps = replaceProp(
-            parsedSchema,
-            componentProp,
-            'component'
-        );
+  return function (baseReturns, props) {
+    var parsedSchema = baseReturns.parsedSchema;
+    var replacedProps = replaceProp(
+      parsedSchema,
+      componentProp,
+      'component'
+    );
 
-        for (var prop in mapProps) {
-            replacedProps = replaceProp(
-                replacedProps,
-                prop,
-                mapProps[prop],
-                { disableWarn: true }
-            );
-        }
-
-        var replacedKeys = unwrap(replacedProps).map(function (el) {
-            var newKey = mapComponents[el.component];
-
-            if (!newKey) { return Object.assign({}, el) }
-
-            return Object.assign({}, el,
-                {component: mapComponents[el.component]})
-        });
-
-        return Object.assign({}, baseReturns,
-            {parsedSchema: replacedKeys})
+    for (var prop in mapProps) {
+      replacedProps = replaceProp(
+        replacedProps,
+        prop,
+        mapProps[prop],
+        { disableWarn: true }
+      );
     }
+
+    var replacedKeys = unwrap(replacedProps).map(function (el) {
+      var newKey = mapComponents[el.component];
+
+      if (!newKey) { return Object.assign({}, el) }
+
+      return Object.assign({}, el,
+        {component: mapComponents[el.component]})
+    });
+
+    return Object.assign({}, baseReturns,
+      {parsedSchema: replacedKeys})
+  }
 }
 
 var replaceProp = function (schema, prop, replacement, ref) {
-    if ( replacement === void 0 ) replacement = 'component';
-    if ( ref === void 0 ) ref = {};
-    var disableWarn = ref.disableWarn; if ( disableWarn === void 0 ) disableWarn = false;
+  if ( replacement === void 0 ) replacement = 'component';
+  if ( ref === void 0 ) ref = {};
+  var disableWarn = ref.disableWarn; if ( disableWarn === void 0 ) disableWarn = false;
 
-    return unwrap(schema).map(function (el) {
-        if (!(prop in el)) {
-            if (!disableWarn) { console.warn(("LookupPlugin: prop \"" + prop + "\" not found in"), el); }
-            return el
-        }
+  return unwrap(schema).map(function (el) {
+    if (!(prop in el)) {
+      if (!disableWarn) { console.warn(("LookupPlugin: prop \"" + prop + "\" not found in"), el); }
+      return el
+    }
 
-        var component = el[prop];
-        delete el[prop];
+    var component = el[prop];
+    var replacedEl = Object.assign({}, el);
+    delete replacedEl[prop];
 
-        el[replacement] = component;
+    replacedEl[replacement] = component;
 
-        return Object.assign({}, el)
-    })
+    return replacedEl
+  })
 };
 
 export { replaceProp };

@@ -18,17 +18,18 @@
   "license": "MIT",
   "scripts": {
     "build": "rollit",
+    "test": "yarn test:unit",
     "test:unit": "jest --coverage",
     "test:unit:watch": "yarn test:unit --watch"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.9.0",
     "@vue/test-utils": "^2.0.0-alpha.6",
+    "babel-jest": "^25.2.6",
     "jest": "^26.0.1",
     "rollit": "^0.0.9",
     "vue": "^3.0.0-beta.12",
-    "vue-jest": "^5.0.0-alpha.0",
-    "babel-jest": "^25.2.6"
+    "vue-jest": "^5.0.0-alpha.0"
   },
   "peerDependencies": {
     "@vue/compiler-sfc": "^3.0.0-beta.12",
