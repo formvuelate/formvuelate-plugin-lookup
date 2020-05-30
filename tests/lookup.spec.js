@@ -71,7 +71,7 @@ describe('Lookup Plugin', () => {
       expect(parsedSchema[0].component).toEqual('BaseInput')
     })
 
-    it.only('can receive a custom parsing function', () => {
+    it('can receive a custom parsing function', () => {
       const componentProp = jest.fn((el) => {
         // Switch component prop to type
         if (el.model === 'firstName') return 'type'
