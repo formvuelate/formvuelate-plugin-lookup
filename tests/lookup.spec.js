@@ -1,21 +1,24 @@
-import LookupPlugin, { replaceProp } from '../src/index.js'
+import LookupPlugin from '../src/index.js'
 
 const schema = [
   {
     "model": "firstName",
     "type": "FormText",
-    "label": "First Name"
+    "label": "First Name",
+    "mappable": true
   },
   {
     "label": "Favorite thing about Vue",
     "required": true,
     "model": "favoriteThingAboutVue",
-    "type": "FormSelect"
+    "type": "FormSelect",
+    "mappable": true
   },
   {
     "label": "Are you a Vue fan?",
     "model": "isVueFan",
-    "type": "FormCheckbox"
+    "type": "FormCheckbox",
+    "mappable": true
   }
 ]
 
@@ -122,21 +125,27 @@ describe('Lookup Plugin', () => {
 
       expect(warn).not.toHaveBeenCalled()
     })
-  })
 
-  describe('replaceProp function', () => {
-    it('replaces a property within a schema', () => {
-      const replacedSchema = replaceProp(
-        schema,
-        'label',
-        'tag',
-        { disableWarn: false }
-      )
+    it('can receive a function to create the mapping', () => {
+      const mapper = jest.fn((el) => {
+        if (el.component === 'FormText') {
+          return {
+            mappable: 'remapped'
+          }
+        }
 
-      for (let el of replacedSchema) {
-        expect('tag' in el).toEqual(true)
-        expect('label' in el).toEqual(false)
-      }
+        return {}
+      })
+
+      const lookup = LookupPlugin({
+        componentProp: 'type',
+        mapProps: mapper
+      })
+
+      const { parsedSchema } = lookup({ parsedSchema: schema })
+
+      expect('mappable' in parsedSchema[0]).toBe(false)
+      expect('remapped' in parsedSchema[0]).toBe(true)
     })
   })
 })

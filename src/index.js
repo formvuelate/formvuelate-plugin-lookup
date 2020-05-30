@@ -12,23 +12,16 @@ const unwrap = v => isRef(v) ? v.value : v
 export default function LookupPlugin ({ componentProp = 'component', mapComponents = {}, mapProps = {} }) {
   return function (baseReturns, props) {
     const { parsedSchema } = baseReturns
-    let replacedProps = replaceProp(
+    let replacedSchema = replacePropInSchema(
       parsedSchema,
       componentProp,
       'component',
       { parser: componentProp }
     )
 
-    for (const prop in mapProps) {
-      replacedProps = replaceProp(
-        replacedProps,
-        prop,
-        mapProps[prop],
-        { disableWarn: true }
-      )
-    }
+    replacedSchema = mapProperties(replacedSchema, mapProps)
 
-    const replacedKeys = unwrap(replacedProps).map(el => {
+    const replacedKeysSchema = unwrap(replacedSchema).map(el => {
       const newKey = mapComponents[el.component]
 
       if (!newKey) return { ...el }
@@ -41,9 +34,40 @@ export default function LookupPlugin ({ componentProp = 'component', mapComponen
 
     return {
       ...baseReturns,
-      parsedSchema: replacedKeys
+      parsedSchema: replacedKeysSchema
     }
   }
+}
+
+const mapProperties = (schema, mapProps) => {
+  let replacedSchema = [...schema]
+
+  if (typeof mapProps === 'function') {
+    replacedSchema = unwrap(replacedSchema).map(el => {
+      let replacedEl = el
+      const map = mapProps(replacedEl)
+      for (const prop in map) {
+        replacedEl = replacePropInElement(
+          replacedEl, prop, map[prop]
+        )
+      }
+
+      return replacedEl
+    })
+  }
+
+  if (typeof mapProps === 'object') {
+    for (const prop in mapProps) {
+      replacedSchema = replacePropInSchema(
+        replacedSchema,
+        prop,
+        mapProps[prop],
+        { disableWarn: true }
+      )
+    }
+  }
+
+  return replacedSchema
 }
 
 /**
@@ -53,28 +77,39 @@ export default function LookupPlugin ({ componentProp = 'component', mapComponen
  * @param {String} replacement - The replacement for the prop
  * @param {Object} options
  * @param {Boolean} options.disableWarn - Disable the console warning if prop not found
- * @param {Null|Function} options.parser - A parsing function to replace default behavior
  */
-export const replaceProp = (schema, prop, replacement = 'component', { disableWarn = false, parser = null } = {}) => {
+const replacePropInSchema = (schema, prop, replacement = 'component', { disableWarn = false } = {}) => {
   return unwrap(schema).map(el => {
-    let replaceProp = prop
-
-    if (typeof prop === 'function') {
-      replaceProp = prop(el)
-      if (!replaceProp) return el
-    }
-
-    if (!(replaceProp in el)) {
-      if (!disableWarn) console.warn(`LookupPlugin: prop "${replaceProp}" not found in`, el)
-      return el
-    }
-
-    const component = el[replaceProp]
-    const replacedEl = { ...el }
-    delete replacedEl[replaceProp]
-
-    replacedEl[replacement] = component
-
-    return replacedEl
+    return replacePropInElement(el, prop, replacement, { disableWarn })
   })
+}
+
+/**
+ *
+ * @param {Object} el - The element to replace props in
+ * @param {String|Function} prop - The prop to replace or fn to pick the prop
+ * @param {String} replacement - The replacement for the prop
+ * @param {Object} options
+ * @param {Boolean} options.disableWarn - Disable the console warning if prop not found
+ */
+const replacePropInElement = (el, prop, replacement = 'component', { disableWarn = false } = {}) => {
+  let replaceProp = prop
+
+  if (typeof prop === 'function') {
+    replaceProp = prop(el)
+    if (!replaceProp) return el
+  }
+
+  if (!(replaceProp in el)) {
+    if (!disableWarn) console.warn(`LookupPlugin: prop "${replaceProp}" not found in`, el)
+    return el
+  }
+
+  const component = el[replaceProp]
+  const replacedEl = { ...el }
+  delete replacedEl[replaceProp]
+
+  replacedEl[replacement] = component
+
+  return replacedEl
 }
