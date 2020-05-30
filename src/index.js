@@ -39,6 +39,11 @@ export default function LookupPlugin ({ componentProp = 'component', mapComponen
   }
 }
 
+/**
+ * Remap properties in a schema
+ * @param {Array} schema - The schema
+ * @param {Function|Object} mapProps - A key pair value object or function that returns it
+ */
 const mapProperties = (schema, mapProps) => {
   let replacedSchema = [...schema]
 
