@@ -15,7 +15,8 @@ export default function LookupPlugin ({ componentProp = 'component', mapComponen
     let replacedProps = replaceProp(
       parsedSchema,
       componentProp,
-      'component'
+      'component',
+      { parser: componentProp }
     )
 
     for (const prop in mapProps) {
@@ -45,16 +46,32 @@ export default function LookupPlugin ({ componentProp = 'component', mapComponen
   }
 }
 
-export const replaceProp = (schema, prop, replacement = 'component', { disableWarn = false } = {}) => {
+/**
+ *
+ * @param {Array} schema - The parsed schema
+ * @param {String|Function} prop - The prop to replace or fn to pick the prop
+ * @param {String} replacement - The replacement for the prop
+ * @param {Object} options
+ * @param {Boolean} options.disableWarn - Disable the console warning if prop not found
+ * @param {Null|Function} options.parser - A parsing function to replace default behavior
+ */
+export const replaceProp = (schema, prop, replacement = 'component', { disableWarn = false, parser = null } = {}) => {
   return unwrap(schema).map(el => {
-    if (!(prop in el)) {
-      if (!disableWarn) console.warn(`LookupPlugin: prop "${prop}" not found in`, el)
+    let replaceProp = prop
+
+    if (typeof prop === 'function') {
+      replaceProp = prop(el)
+      if (!replaceProp) return el
+    }
+
+    if (!(replaceProp in el)) {
+      if (!disableWarn) console.warn(`LookupPlugin: prop "${replaceProp}" not found in`, el)
       return el
     }
 
-    const component = el[prop]
+    const component = el[replaceProp]
     const replacedEl = { ...el }
-    delete replacedEl[prop]
+    delete replacedEl[replaceProp]
 
     replacedEl[replacement] = component
 

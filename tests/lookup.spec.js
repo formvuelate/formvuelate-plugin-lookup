@@ -70,6 +70,29 @@ describe('Lookup Plugin', () => {
 
       expect(parsedSchema[0].component).toEqual('BaseInput')
     })
+
+    it.only('can receive a custom parsing function', () => {
+      const componentProp = jest.fn((el) => {
+        // Switch component prop to type
+        if (el.model === 'firstName') return 'type'
+
+        // Skip parsing this component
+        return false
+      })
+
+      const lookup = LookupPlugin({
+        componentProp
+      })
+
+      const { parsedSchema } = lookup({ parsedSchema: schema })
+
+      expect(componentProp).toHaveBeenCalledTimes(3)
+      expect(parsedSchema[0].component).toEqual('FormText')
+      expect(parsedSchema[1].component).toBeUndefined()
+      expect(parsedSchema[1].type).toEqual('FormSelect')
+      expect(parsedSchema[2].component).toBeUndefined()
+      expect(parsedSchema[2].type).toEqual('FormCheckbox')
+    })
   })
 
   describe('mapProps', () => {
