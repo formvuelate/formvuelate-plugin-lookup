@@ -3,25 +3,17 @@ const unwrap = v => isRef(v) ? v.value : v
 
 /**
  * LookupPlugin
- * @param {String|Function} prop0.componentProp - Main property that holds the component definition or a function to determine it
  * @param {Object} prop0.mapComponents - Key value pair of component mapping
  * @param {Object|Function} prop0.mapProps - Key value pair of prop mapping or a function that returns it
  *
  * @returns {Function}
  */
-export default function LookupPlugin ({ componentProp = 'component', mapComponents = {}, mapProps = {} }) {
-  return function (baseReturns, props) {
+export default function LookupPlugin ({ mapComponents = {}, mapProps = {} }) {
+  return function (baseReturns) {
     const { parsedSchema } = baseReturns
-    let replacedSchema = replacePropInSchema(
-      parsedSchema,
-      componentProp,
-      'component',
-      { parser: componentProp }
-    )
+    let replacedSchema = mapProperties(parsedSchema, mapProps)
 
-    replacedSchema = mapProperties(replacedSchema, mapProps)
-
-    const replacedKeysSchema = unwrap(replacedSchema).map(el => {
+    replacedSchema = unwrap(replacedSchema).map(el => {
       const newKey = mapComponents[el.component]
 
       if (!newKey) return { ...el }
@@ -34,7 +26,7 @@ export default function LookupPlugin ({ componentProp = 'component', mapComponen
 
     return {
       ...baseReturns,
-      parsedSchema: replacedKeysSchema
+      parsedSchema: replacedSchema
     }
   }
 }
