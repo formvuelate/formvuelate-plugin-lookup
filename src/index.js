@@ -75,7 +75,7 @@ const mapProperties = (schema, mapProps) => {
  * @param {Object} options
  * @param {Boolean} options.disableWarn - Disable the console warning if prop not found
  */
-const replacePropInSchema = (schema, prop, replacement = 'component', { disableWarn = false } = {}) => {
+const replacePropInSchema = (schema, prop, replacement, { disableWarn = false } = {}) => {
   return unwrap(schema).map(el => {
     return replacePropInElement(el, prop, replacement, { disableWarn })
   })
@@ -89,7 +89,7 @@ const replacePropInSchema = (schema, prop, replacement = 'component', { disableW
  * @param {Object} options
  * @param {Boolean} options.disableWarn - Disable the console warning if prop not found
  */
-const replacePropInElement = (el, prop, replacement = 'component', { disableWarn = false } = {}) => {
+const replacePropInElement = (el, prop, replacement, { disableWarn = false } = {}) => {
   let replaceProp = prop
 
   if (typeof prop === 'function') {
