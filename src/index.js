@@ -102,11 +102,18 @@ const replacePropInElement = (el, prop, replacement, { disableWarn = false } = {
     return el
   }
 
-  const component = el[replaceProp]
+  const componentSpec = el[replaceProp]
   const replacedEl = { ...el }
+
+  if (replaceProp === false) {
+    delete replacedEl[replaceProp]
+
+    return replacedEl
+  }
+
   delete replacedEl[replaceProp]
 
-  replacedEl[replacement] = component
+  replacedEl[replacement] = componentSpec
 
   return replacedEl
 }

@@ -5,20 +5,23 @@ const schema = [
     "model": "firstName",
     "type": "FormText",
     "label": "First Name",
-    "mappable": true
+    "mappable": true,
+    "unique": false
   },
   {
     "label": "Favorite thing about Vue",
     "required": true,
     "model": "favoriteThingAboutVue",
     "type": "FormSelect",
-    "mappable": true
+    "mappable": true,
+    "unique": false
   },
   {
     "label": "Are you a Vue fan?",
     "model": "isVueFan",
     "type": "FormCheckbox",
-    "mappable": true
+    "mappable": true,
+    "unique": false
   }
 ]
 
@@ -97,6 +100,37 @@ describe('Lookup Plugin', () => {
 
       expect('mappable' in parsedSchema[0]).toBe(false)
       expect('remapped' in parsedSchema[0]).toBe(true)
+    })
+
+    describe('deleting properties', () => {
+      it('can delete a property if its equal to false', () => {
+        const lookup = LookupPlugin({
+          mapProps: {
+            label: false
+          }
+        })
+        const { parsedSchema } = lookup({ parsedSchema: schema })
+
+        for (let el of parsedSchema) {
+          expect('label' in el).toEqual(false)
+        }
+      })
+
+      it('can delete a property through a function', () => {
+        const lookup = LookupPlugin({
+          mapProps: (el) => {
+            return {
+              label: false
+            }
+          }
+        })
+
+        const { parsedSchema } = lookup({ parsedSchema: schema })
+
+        for (let el of parsedSchema) {
+          expect('label' in el).toEqual(false)
+        }
+      })
     })
   })
 })
