@@ -56,27 +56,13 @@ const mapProperties = (schema, mapProps) => {
 
   if (typeof mapProps === 'object') {
     for (const prop in mapProps) {
-      replacedSchema = replacePropInSchema(
-        replacedSchema,
-        prop,
-        mapProps[prop]
-      )
+      replacedSchema = unwrap(replacedSchema).map(el => {
+        return replacePropInElement(el, prop, mapProps[prop])
+      })
     }
   }
 
   return replacedSchema
-}
-
-/**
- *
- * @param {Array} schema - The parsed schema
- * @param {String|Function} prop - The prop to replace or fn to pick the prop
- * @param {String} replacement - The replacement for the prop
- */
-const replacePropInSchema = (schema, prop, replacement) => {
-  return unwrap(schema).map(el => {
-    return replacePropInElement(el, prop, replacement)
-  })
 }
 
 /**
