@@ -3,8 +3,9 @@ const unwrap = v => isRef(v) ? v.value : v
 
 /**
  * LookupPlugin
- * @param {Object} prop0.mapComponents - Key value pair of component mapping
- * @param {Object|Function} prop0.mapProps - Key value pair of prop mapping or a function that returns it
+ * @param {Object} configuration
+ * @param {Object} configuration.mapComponents - Key value pair of component mapping
+ * @param {Object|Function} configuration.mapProps - Key value pair of prop mapping or a function that returns it
  *
  * @returns {Function}
  */
