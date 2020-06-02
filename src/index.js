@@ -93,7 +93,10 @@ const replacePropInElement = (el, prop, replacement) => {
   }
 
   if (!(replaceProp in el)) {
-    console.warn(`LookupPlugin: prop "${replaceProp}" not found in`, el)
+    if (process.env.NODE_ENV !== 'production') {
+      console.warn(`LookupPlugin: prop "${replaceProp}" not found in`, el)
+    }
+
     return el
   }
 
