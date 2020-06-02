@@ -58,8 +58,7 @@ const mapProperties = (schema, mapProps) => {
       replacedSchema = replacePropInSchema(
         replacedSchema,
         prop,
-        mapProps[prop],
-        { disableWarn: true }
+        mapProps[prop]
       )
     }
   }
@@ -72,12 +71,10 @@ const mapProperties = (schema, mapProps) => {
  * @param {Array} schema - The parsed schema
  * @param {String|Function} prop - The prop to replace or fn to pick the prop
  * @param {String} replacement - The replacement for the prop
- * @param {Object} options
- * @param {Boolean} options.disableWarn - Disable the console warning if prop not found
  */
-const replacePropInSchema = (schema, prop, replacement, { disableWarn = false } = {}) => {
+const replacePropInSchema = (schema, prop, replacement) => {
   return unwrap(schema).map(el => {
-    return replacePropInElement(el, prop, replacement, { disableWarn })
+    return replacePropInElement(el, prop, replacement)
   })
 }
 
@@ -86,10 +83,8 @@ const replacePropInSchema = (schema, prop, replacement, { disableWarn = false } 
  * @param {Object} el - The element to replace props in
  * @param {String|Function} prop - The prop to replace or fn to pick the prop
  * @param {String} replacement - The replacement for the prop
- * @param {Object} options
- * @param {Boolean} options.disableWarn - Disable the console warning if prop not found
  */
-const replacePropInElement = (el, prop, replacement, { disableWarn = false } = {}) => {
+const replacePropInElement = (el, prop, replacement) => {
   let replaceProp = prop
 
   if (typeof prop === 'function') {
@@ -98,7 +93,7 @@ const replacePropInElement = (el, prop, replacement, { disableWarn = false } = {
   }
 
   if (!(replaceProp in el)) {
-    if (!disableWarn) console.warn(`LookupPlugin: prop "${replaceProp}" not found in`, el)
+    console.warn(`LookupPlugin: prop "${replaceProp}" not found in`, el)
     return el
   }
 

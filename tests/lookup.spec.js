@@ -66,18 +66,6 @@ describe('Lookup Plugin', () => {
       }
     })
 
-    it('disables warnings for elements without a particular prop', () => {
-      const lookup = LookupPlugin({
-        componentProp: 'type',
-        mapProps: {
-          required: 'mandatory'
-        }
-      })
-      const { parsedSchema } = lookup({ parsedSchema: schema })
-
-      expect(warn).not.toHaveBeenCalled()
-    })
-
     it('can receive a function to create the mapping', () => {
       const mapper = jest.fn((el) => {
         if (el.type === 'FormText') {
