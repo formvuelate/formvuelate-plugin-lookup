@@ -14,22 +14,31 @@ export default function LookupPlugin ({ mapComponents = {}, mapProps = {} }) {
     const { parsedSchema } = baseReturns
     let replacedSchema = mapProperties(parsedSchema, mapProps)
 
-    replacedSchema = unwrap(replacedSchema).map(el => {
-      const newKey = mapComponents[el.component]
-
-      if (!newKey) return { ...el }
-
-      return {
-        ...el,
-        component: mapComponents[el.component]
-      }
-    })
+    replacedSchema = mapComps(replacedSchema, mapComponents)
 
     return {
       ...baseReturns,
       parsedSchema: replacedSchema
     }
   }
+}
+
+/**
+ * Remap components in a schema
+ * @param {Array} schema - The schema
+ * @param {Object} mapComponents
+ */
+const mapComps = (schema, mapComponents) => {
+  return unwrap(schema).map(el => {
+    const newKey = mapComponents[el.component]
+
+    if (!newKey) return { ...el }
+
+    return {
+      ...el,
+      component: mapComponents[el.component]
+    }
+  })
 }
 
 /**
