@@ -89,6 +89,11 @@ describe('Lookup Plugin', () => {
 
       expect('mappable' in parsedSchema[0]).toBe(false)
       expect('remapped' in parsedSchema[0]).toBe(true)
+
+      for (let el of parsedSchema) {
+        expect('component' in el).toEqual(true)
+        expect('type' in el).toEqual(false)
+      }
     })
 
     it('can map a prop as a function', () => {
