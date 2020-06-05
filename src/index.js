@@ -78,7 +78,7 @@ const mapProperties = (schema, mapProps) => {
  *
  * @param {Object} el - The element to replace props in
  * @param {String} prop - The prop to replace or fn to pick the prop
- * @param {String|Function} replacement - The replacement for the prop
+ * @param {String|Function|Boolean} replacement - The replacement for the prop, a function that returns it or the boolean "false" to delete it
  */
 const replacePropInElement = (el, prop, replacement) => {
   let replaceProp = prop
