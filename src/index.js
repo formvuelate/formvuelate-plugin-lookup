@@ -83,36 +83,36 @@ const mapProperties = (schema, mapProps) => {
  * @param {String|Function|Boolean} replacement - The replacement for the prop, a function that returns it or the boolean "false" to delete it
  */
 const replacePropInElement = (el, prop, replacement) => {
-  let replaceProp = prop
+  let propToBeReplaced = prop
 
   // If replacement is a function, call it to get
   // the prop to be replaced. If its falsey, then return
   // the element as is
   if (typeof replacement === 'function') {
-    replaceProp = replacement(el)
-    if (!replaceProp) return el
+    propToBeReplaced = replacement(el)
+    if (!propToBeReplaced) return el
   }
 
-  if (!(replaceProp in el)) {
+  if (!(propToBeReplaced in el)) {
     if (process.env && process.env.NODE_ENV !== 'production') {
-      console.warn(`LookupPlugin: prop "${replaceProp}" not found in`, el)
+      console.warn(`LookupPlugin: prop "${propToBeReplaced}" not found in`, el)
     }
 
     return el
   }
 
-  const componentSpec = el[replaceProp]
-  const replacedEl = { ...el }
+  const originalValue = el[propToBeReplaced]
+  const elementCopy = { ...el }
 
   if (replacement === false) {
-    delete replacedEl[replaceProp]
+    delete elementCopy[propToBeReplaced]
 
-    return replacedEl
+    return elementCopy
   }
 
-  delete replacedEl[replaceProp]
+  delete elementCopy[propToBeReplaced]
 
-  replacedEl[replacement] = componentSpec
+  elementCopy[replacement] = originalValue
 
-  return replacedEl
+  return elementCopy
 }
