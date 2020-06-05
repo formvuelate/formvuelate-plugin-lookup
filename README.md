@@ -2,7 +2,7 @@
 
 Lookup plugin for FormVueLatte
 
-For documentation check out [FormVueLatte's docs](https://github.com/vuelidate/formvuelatte)
+For full documentation check out [FormVueLatte's docs](https://github.com/vuelidate/formvuelatte)
 
 ## Quick example
 
@@ -26,7 +26,6 @@ import SCHEMA from 'some/schema.json'
 
 const SchemaFormWithPlugin = SchemaFormFactory([
   LookupPlugin({
-    componentProp: 'type',
     mapComponents: {
       string: 'FormText',
       array: 'FormSelect',
@@ -34,6 +33,7 @@ const SchemaFormWithPlugin = SchemaFormFactory([
       SchemaForm: 'SchemaFormWithPlugin'
     },
     mapProps: {
+      type: 'component',
       info: 'label'
     }
   })
