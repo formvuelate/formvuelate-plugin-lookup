@@ -1,12 +1,10 @@
 /**
- * @formvuelatte/plugin-lookup v1.0.1
+ * @formvuelatte/plugin-lookup v1.1.0
  * (c) 2020 Marina Mosti <marina@mosti.com.mx>
  * @license MIT
  */
 
 'use strict';
-
-Object.defineProperty(exports, '__esModule', { value: true });
 
 // Make a map and return a function for checking if a key
 // is in that map.
@@ -3258,68 +3256,119 @@ var unwrap = function (v) { return isRef(v) ? v.value : v; };
 
 /**
  * LookupPlugin
- * @param {String} prop0.componentProp - Main property that holds the component definition
- * @param {Object} prop0.mapComponents - Key value pair of component mapping
- * @param {Object} prop0.mapProps - Key value pair of prop mapping
+ * @param {Object} configuration
+ * @param {Object|Function} configuration.mapComponents - Key value pair of component mapping or a function that returns it
+ * @param {Object|Function} configuration.mapProps - Key value pair of prop mapping or a function that returns it
  *
  * @returns {Function}
  */
 function LookupPlugin (ref) {
-  var componentProp = ref.componentProp; if ( componentProp === void 0 ) componentProp = 'component';
   var mapComponents = ref.mapComponents; if ( mapComponents === void 0 ) mapComponents = {};
   var mapProps = ref.mapProps; if ( mapProps === void 0 ) mapProps = {};
 
-  return function (baseReturns, props) {
+  return function (baseReturns) {
     var parsedSchema = baseReturns.parsedSchema;
-    var replacedProps = replaceProp(
-      parsedSchema,
-      componentProp,
-      'component'
-    );
+    var replacedSchema = mapProperties(parsedSchema, mapProps);
 
-    for (var prop in mapProps) {
-      replacedProps = replaceProp(
-        replacedProps,
-        prop,
-        mapProps[prop],
-        { disableWarn: true }
-      );
-    }
-
-    var replacedKeys = unwrap(replacedProps).map(function (el) {
-      var newKey = mapComponents[el.component];
-
-      if (!newKey) { return Object.assign({}, el) }
-
-      return Object.assign({}, el,
-        {component: mapComponents[el.component]})
-    });
+    replacedSchema = mapComps(replacedSchema, mapComponents);
 
     return Object.assign({}, baseReturns,
-      {parsedSchema: replacedKeys})
+      {parsedSchema: replacedSchema})
   }
 }
 
-var replaceProp = function (schema, prop, replacement, ref) {
-  if ( replacement === void 0 ) replacement = 'component';
-  if ( ref === void 0 ) ref = {};
-  var disableWarn = ref.disableWarn; if ( disableWarn === void 0 ) disableWarn = false;
-
+/**
+ * Remap components in a schema
+ * @param {Array} schema - The schema
+ * @param {Object|Function} mapComponents
+* @returns {Array}
+ */
+var mapComps = function (schema, mapComponents) {
   return unwrap(schema).map(function (el) {
-    if (!(prop in el)) {
-      if (!disableWarn) { console.warn(("LookupPlugin: prop \"" + prop + "\" not found in"), el); }
-      return el
-    }
+    var newKey = mapComponents[el.component];
 
-    var component = el[prop];
-    var replacedEl = Object.assign({}, el);
-    delete replacedEl[prop];
+    if (!newKey) { return Object.assign({}, el) }
 
-    replacedEl[replacement] = component;
-
-    return replacedEl
+    return Object.assign({}, el,
+      {component: mapComponents[el.component]})
   })
 };
 
-exports['default'] = LookupPlugin;
-exports.replaceProp = replaceProp;
+/**
+ * Remap properties in a schema
+ * @param {Array} schema - The schema
+ * @param {Function|Object} mapProps - A key pair value object or function that returns it
+ * @returns {Array}
+ */
+var mapProperties = function (schema, mapProps) {
+  var schemaCopy = [].concat( schema );
+
+  if (typeof mapProps === 'function') {
+    schemaCopy = unwrap(schemaCopy).map(function (el) {
+      var replacedEl = el;
+      var map = mapProps(replacedEl);
+      for (var prop in map) {
+        replacedEl = replacePropInElement(
+          replacedEl, prop, map[prop]
+        );
+      }
+
+      return replacedEl
+    });
+  }
+
+  if (typeof mapProps === 'object') {
+    var loop = function ( prop ) {
+      schemaCopy = unwrap(schemaCopy).map(function (el) {
+        return replacePropInElement(el, prop, mapProps[prop])
+      });
+    };
+
+    for (var prop in mapProps) loop( prop );
+  }
+
+  return schemaCopy
+};
+
+/**
+ *
+ * @param {Object} el - The element to replace props in
+ * @param {String} prop - The prop to replace or fn to pick the prop
+ * @param {String|Function|Boolean} replacement - The replacement for the prop, a function that returns it or the boolean "false" to delete it
+ */
+var replacePropInElement = function (el, prop, replacement) {
+  var propToBeReplaced = prop;
+
+  // If replacement is a function, call it to get
+  // the prop to be replaced. If its falsey, then return
+  // the element as is
+  if (typeof replacement === 'function') {
+    propToBeReplaced = replacement(el);
+    if (!propToBeReplaced) { return el }
+  }
+
+  if (!(propToBeReplaced in el)) {
+    if (process.env && "development" !== 'production') {
+      console.warn(("LookupPlugin: prop \"" + propToBeReplaced + "\" not found in"), el);
+    }
+
+    return el
+  }
+
+  var originalValue = el[propToBeReplaced];
+  var elementCopy = Object.assign({}, el);
+
+  if (replacement === false) {
+    delete elementCopy[propToBeReplaced];
+
+    return elementCopy
+  }
+
+  delete elementCopy[propToBeReplaced];
+
+  elementCopy[replacement] = originalValue;
+
+  return elementCopy
+};
+
+module.exports = LookupPlugin;
