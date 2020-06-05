@@ -26,6 +26,7 @@ const schema = [
 ]
 
 const warn = jest.spyOn(console, 'warn').mockImplementation();
+const currentENV = process.env ? process.env.NODE_ENV : null
 
 describe('Lookup Plugin', () => {
   beforeEach(() => jest.clearAllMocks())
@@ -88,6 +89,42 @@ describe('Lookup Plugin', () => {
 
       expect('mappable' in parsedSchema[0]).toBe(false)
       expect('remapped' in parsedSchema[0]).toBe(true)
+    })
+
+    it('can map a prop as a function', () => {
+      const lookup = LookupPlugin({
+        mapProps: {
+          type: 'component',
+          mappable: (el) => {
+            if (el.label === "First Name") {
+              return 'nameable'
+            }
+
+            return false
+          }
+        }
+      })
+
+      const { parsedSchema } = lookup({ parsedSchema: schema })
+
+      for (let el of parsedSchema) {
+        expect('nameable' in el).toEqual(el.component === 'First Name' ? true : false)
+      }
+    })
+
+    describe('warnings', () => {
+      it('throws a console warning if prop is not found', () => {
+        const lookup = LookupPlugin({
+          mapProps: {
+            foo: 'bar'
+          }
+        })
+
+        lookup({ parsedSchema: schema })
+
+        expect(warn).toHaveBeenCalledTimes(3)
+        expect(warn).toHaveBeenCalledWith(expect.stringContaining('prop "foo" not found'), expect.anything())
+      })
     })
 
     describe('deleting properties', () => {

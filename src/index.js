@@ -77,19 +77,19 @@ const mapProperties = (schema, mapProps) => {
 /**
  *
  * @param {Object} el - The element to replace props in
- * @param {String|Function} prop - The prop to replace or fn to pick the prop
- * @param {String} replacement - The replacement for the prop
+ * @param {String} prop - The prop to replace or fn to pick the prop
+ * @param {String|Function} replacement - The replacement for the prop
  */
 const replacePropInElement = (el, prop, replacement) => {
   let replaceProp = prop
 
-  if (typeof prop === 'function') {
-    replaceProp = prop(el)
+  if (typeof replacement === 'function') {
+    replaceProp = replacement(el)
     if (!replaceProp) return el
   }
 
   if (!(replaceProp in el)) {
-    if (process.env.NODE_ENV !== 'production') {
+    if (process.env && process.env.NODE_ENV !== 'production') {
       console.warn(`LookupPlugin: prop "${replaceProp}" not found in`, el)
     }
 
@@ -99,7 +99,7 @@ const replacePropInElement = (el, prop, replacement) => {
   const componentSpec = el[replaceProp]
   const replacedEl = { ...el }
 
-  if (replaceProp === false) {
+  if (replacement === false) {
     delete replacedEl[replaceProp]
 
     return replacedEl
