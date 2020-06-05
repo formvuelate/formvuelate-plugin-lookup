@@ -4,7 +4,7 @@ const unwrap = v => isRef(v) ? v.value : v
 /**
  * LookupPlugin
  * @param {Object} configuration
- * @param {Object} configuration.mapComponents - Key value pair of component mapping
+ * @param {Object|Function} configuration.mapComponents - Key value pair of component mapping or a function that returns it
  * @param {Object|Function} configuration.mapProps - Key value pair of prop mapping or a function that returns it
  *
  * @returns {Function}
@@ -26,7 +26,8 @@ export default function LookupPlugin ({ mapComponents = {}, mapProps = {} }) {
 /**
  * Remap components in a schema
  * @param {Array} schema - The schema
- * @param {Object} mapComponents
+ * @param {Object|Function} mapComponents
+* @returns {Array}
  */
 const mapComps = (schema, mapComponents) => {
   return unwrap(schema).map(el => {
@@ -45,6 +46,7 @@ const mapComps = (schema, mapComponents) => {
  * Remap properties in a schema
  * @param {Array} schema - The schema
  * @param {Function|Object} mapProps - A key pair value object or function that returns it
+ * @returns {Array}
  */
 const mapProperties = (schema, mapProps) => {
   let replacedSchema = [...schema]
