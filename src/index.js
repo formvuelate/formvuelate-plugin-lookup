@@ -85,6 +85,9 @@ const mapProperties = (schema, mapProps) => {
 const replacePropInElement = (el, prop, replacement) => {
   let replaceProp = prop
 
+  // If replacement is a function, call it to get
+  // the prop to be replaced. If its falsey, then return
+  // the element as is
   if (typeof replacement === 'function') {
     replaceProp = replacement(el)
     if (!replaceProp) return el
