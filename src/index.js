@@ -49,10 +49,10 @@ const mapComps = (schema, mapComponents) => {
  * @returns {Array}
  */
 const mapProperties = (schema, mapProps) => {
-  let replacedSchema = [...schema]
+  let schemaCopy = [...schema]
 
   if (typeof mapProps === 'function') {
-    replacedSchema = unwrap(replacedSchema).map(el => {
+    schemaCopy = unwrap(schemaCopy).map(el => {
       let replacedEl = el
       const map = mapProps(replacedEl)
       for (const prop in map) {
@@ -67,13 +67,13 @@ const mapProperties = (schema, mapProps) => {
 
   if (typeof mapProps === 'object') {
     for (const prop in mapProps) {
-      replacedSchema = unwrap(replacedSchema).map(el => {
+      schemaCopy = unwrap(schemaCopy).map(el => {
         return replacePropInElement(el, prop, mapProps[prop])
       })
     }
   }
 
-  return replacedSchema
+  return schemaCopy
 }
 
 /**
