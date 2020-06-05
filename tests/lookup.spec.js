@@ -1,65 +1,45 @@
-import LookupPlugin, { replaceProp } from '../src/index.js'
+import LookupPlugin from '../src/index.js'
 
 const schema = [
   {
     "model": "firstName",
     "type": "FormText",
-    "label": "First Name"
+    "label": "First Name",
+    "mappable": true,
+    "unique": false
   },
   {
     "label": "Favorite thing about Vue",
     "required": true,
     "model": "favoriteThingAboutVue",
-    "type": "FormSelect"
+    "type": "FormSelect",
+    "mappable": true,
+    "unique": false
   },
   {
     "label": "Are you a Vue fan?",
     "model": "isVueFan",
-    "type": "FormCheckbox"
+    "type": "FormCheckbox",
+    "mappable": true,
+    "unique": false
   }
 ]
 
 const warn = jest.spyOn(console, 'warn').mockImplementation();
+const currentENV = process.env ? process.env.NODE_ENV : null
 
 describe('Lookup Plugin', () => {
   beforeEach(() => jest.clearAllMocks())
   afterAll(() => warn.mockRestore())
 
-  describe('componentProp', () => {
-    it('replaces the component prop with the given one in config', () => {
-      const lookup = LookupPlugin({ componentProp: 'type' })
-      const { parsedSchema } = lookup({
-        parsedSchema: schema
-      })
-
-      for (let el of parsedSchema) {
-        expect('component' in el).toEqual(true)
-        expect('type' in el).toEqual(false)
-      }
-    })
-
-    it('throws a console warning if the component prop is not found', () => {
-      const lookup = LookupPlugin({ componentProp: 'type' })
-      lookup({
-        parsedSchema: [
-          {
-            "model": "firstName",
-            "other": "FormText",
-            "label": "First Name"
-          },
-        ]
-      })
-
-      expect(warn).toHaveBeenCalledTimes(1)
-    })
-  })
-
   describe('mapComponents', () => {
     it('maps an key value object of components inside the schema', () => {
       const lookup = LookupPlugin({
-        componentProp: 'type',
         mapComponents: {
           'FormText': 'BaseInput'
+        },
+        mapProps: {
+          type: 'component'
         }
       })
       const { parsedSchema } = lookup({ parsedSchema: schema })
@@ -75,7 +55,6 @@ describe('Lookup Plugin', () => {
   describe('mapProps', () => {
     it('maps props in the schema elements from a key value pair object', () => {
       const lookup = LookupPlugin({
-        componentProp: 'type',
         mapProps: {
           label: 'tag'
         }
@@ -88,32 +67,100 @@ describe('Lookup Plugin', () => {
       }
     })
 
-    it('disables warnings for elements without a particular prop', () => {
-      const lookup = LookupPlugin({
-        componentProp: 'type',
-        mapProps: {
-          required: 'mandatory'
+    it('can receive a function to create the mapping', () => {
+      const mapper = jest.fn((el) => {
+        if (el.type === 'FormText') {
+          return {
+            mappable: 'remapped',
+            type: 'component'
+          }
+        }
+
+        return {
+          type: 'component'
         }
       })
+
+      const lookup = LookupPlugin({
+        mapProps: mapper
+      })
+
       const { parsedSchema } = lookup({ parsedSchema: schema })
 
-      expect(warn).not.toHaveBeenCalled()
-    })
-  })
+      expect('mappable' in parsedSchema[0]).toBe(false)
+      expect('remapped' in parsedSchema[0]).toBe(true)
 
-  describe('replaceProp function', () => {
-    it('replaces a property within a schema', () => {
-      const replacedSchema = replaceProp(
-        schema,
-        'label',
-        'tag',
-        { disableWarn: false }
-      )
-
-      for (let el of replacedSchema) {
-        expect('tag' in el).toEqual(true)
-        expect('label' in el).toEqual(false)
+      for (let el of parsedSchema) {
+        expect('component' in el).toEqual(true)
+        expect('type' in el).toEqual(false)
       }
+    })
+
+    it('can map a prop as a function', () => {
+      const lookup = LookupPlugin({
+        mapProps: {
+          type: 'component',
+          mappable: (el) => {
+            if (el.label === "First Name") {
+              return 'nameable'
+            }
+
+            return false
+          }
+        }
+      })
+
+      const { parsedSchema } = lookup({ parsedSchema: schema })
+
+      for (let el of parsedSchema) {
+        expect('nameable' in el).toEqual(el.component === 'First Name' ? true : false)
+      }
+    })
+
+    describe('warnings', () => {
+      it('throws a console warning if prop is not found', () => {
+        const lookup = LookupPlugin({
+          mapProps: {
+            foo: 'bar'
+          }
+        })
+
+        lookup({ parsedSchema: schema })
+
+        expect(warn).toHaveBeenCalledTimes(3)
+        expect(warn).toHaveBeenCalledWith(expect.stringContaining('prop "foo" not found'), expect.anything())
+      })
+    })
+
+    describe('deleting properties', () => {
+      it('can delete a property if its equal to false', () => {
+        const lookup = LookupPlugin({
+          mapProps: {
+            label: false
+          }
+        })
+        const { parsedSchema } = lookup({ parsedSchema: schema })
+
+        for (let el of parsedSchema) {
+          expect('label' in el).toEqual(false)
+        }
+      })
+
+      it('can delete a property through a function', () => {
+        const lookup = LookupPlugin({
+          mapProps: (el) => {
+            return {
+              label: false
+            }
+          }
+        })
+
+        const { parsedSchema } = lookup({ parsedSchema: schema })
+
+        for (let el of parsedSchema) {
+          expect('label' in el).toEqual(false)
+        }
+      })
     })
   })
 })
