@@ -1,5 +1,5 @@
 /**
- * @formvuelatte/plugin-lookup v1.1.0
+ * @formvuelatte/plugin-lookup v1.1.1
  * (c) 2020 Marina Mosti <marina@mosti.com.mx>
  * @license MIT
  */
@@ -3266,6 +3266,8 @@ function LookupPlugin (ref) {
 
   return function (baseReturns) {
     var parsedSchema = baseReturns.parsedSchema;
+    parsedSchema = unwrap(parsedSchema);
+
     var replacedSchema = mapProperties(parsedSchema, mapProps);
 
     replacedSchema = mapComps(replacedSchema, mapComponents);
@@ -3282,7 +3284,7 @@ function LookupPlugin (ref) {
 * @returns {Array}
  */
 var mapComps = function (schema, mapComponents) {
-  return unwrap(schema).map(function (el) {
+  return schema.map(function (el) {
     var newKey = mapComponents[el.component];
 
     if (!newKey) { return Object.assign({}, el) }
@@ -3302,7 +3304,7 @@ var mapProperties = function (schema, mapProps) {
   var schemaCopy = [].concat( schema );
 
   if (typeof mapProps === 'function') {
-    schemaCopy = unwrap(schemaCopy).map(function (el) {
+    schemaCopy = schemaCopy.map(function (el) {
       var replacedEl = el;
       var map = mapProps(replacedEl);
       for (var prop in map) {
@@ -3317,7 +3319,7 @@ var mapProperties = function (schema, mapProps) {
 
   if (typeof mapProps === 'object') {
     var loop = function ( prop ) {
-      schemaCopy = unwrap(schemaCopy).map(function (el) {
+      schemaCopy = schemaCopy.map(function (el) {
         return replacePropInElement(el, prop, mapProps[prop])
       });
     };
