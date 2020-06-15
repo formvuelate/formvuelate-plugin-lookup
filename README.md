@@ -2,7 +2,7 @@
 
 Lookup plugin for FormVueLatte
 
-For full documentation check out [FormVueLatte's docs](https://github.com/vuelidate/formvuelatte)
+For full documentation check out [FormVueLatte's docs](http://formvuelatte-next.netlify.app/)
 
 ## Quick example
 
