@@ -11,7 +11,9 @@ const unwrap = v => isRef(v) ? v.value : v
  */
 export default function LookupPlugin ({ mapComponents = {}, mapProps = {} }) {
   return function (baseReturns) {
-    const { parsedSchema } = baseReturns
+    let { parsedSchema } = baseReturns
+    parsedSchema = unwrap(parsedSchema)
+
     let replacedSchema = mapProperties(parsedSchema, mapProps)
 
     replacedSchema = mapComps(replacedSchema, mapComponents)
@@ -30,7 +32,7 @@ export default function LookupPlugin ({ mapComponents = {}, mapProps = {} }) {
 * @returns {Array}
  */
 const mapComps = (schema, mapComponents) => {
-  return unwrap(schema).map(el => {
+  return schema.map(el => {
     const newKey = mapComponents[el.component]
 
     if (!newKey) return { ...el }
@@ -52,7 +54,7 @@ const mapProperties = (schema, mapProps) => {
   let schemaCopy = [...schema]
 
   if (typeof mapProps === 'function') {
-    schemaCopy = unwrap(schemaCopy).map(el => {
+    schemaCopy = schemaCopy.map(el => {
       let replacedEl = el
       const map = mapProps(replacedEl)
       for (const prop in map) {
@@ -67,7 +69,7 @@ const mapProperties = (schema, mapProps) => {
 
   if (typeof mapProps === 'object') {
     for (const prop in mapProps) {
-      schemaCopy = unwrap(schemaCopy).map(el => {
+      schemaCopy = schemaCopy.map(el => {
         return replacePropInElement(el, prop, mapProps[prop])
       })
     }
