@@ -1,5 +1,5 @@
 /**
- * @formvuelatte/plugin-lookup v1.1.1
+ * @formvuelatte/plugin-lookup v1.1.2
  * (c) 2020 Marina Mosti <marina@mosti.com.mx>
  * @license MIT
  */
@@ -880,6 +880,51 @@ function toRaw$1(observed) {
 }
 function isRef(r) {
     return r ? r.__v_isRef === true : false;
+}
+function computed$1(getterOrOptions) {
+    var getter;
+    var setter;
+    if (isFunction(getterOrOptions)) {
+        getter = getterOrOptions;
+        setter = function () {
+                console.warn('Write operation failed: computed value is readonly');
+            };
+    }
+    else {
+        getter = getterOrOptions.get;
+        setter = getterOrOptions.set;
+    }
+    var dirty = true;
+    var value;
+    var computed;
+    var runner = effect(getter, {
+        lazy: true,
+        // mark effect as computed so that it gets priority during trigger
+        computed: true,
+        scheduler: function () {
+            if (!dirty) {
+                dirty = true;
+                trigger$1(computed, "set" /* SET */, 'value');
+            }
+        }
+    });
+    computed = {
+        __v_isRef: true,
+        // expose effect so computed can be stopped
+        effect: runner,
+        get value() {
+            if (dirty) {
+                value = runner();
+                dirty = false;
+            }
+            track(computed, "get" /* GET */, 'value');
+            return value;
+        },
+        set value(newValue) {
+            setter(newValue);
+        }
+    };
+    return computed;
 }
 
 var stack = [];
@@ -2448,6 +2493,12 @@ function formatComponentName(Component, isRoot) {
     return name ? classify(name) : isRoot ? "App" : "Anonymous";
 }
 
+function computed$$1(getterOrOptions) {
+    var c = computed$1(getterOrOptions);
+    recordInstanceBoundEffect(c.effect);
+    return c;
+}
+
 // Actual implementation
 function h(type, propsOrChildren, children) {
     if (arguments.length === 2) {
@@ -3252,8 +3303,6 @@ function hasCSSTransform(el, root, moveClass) {
 var rendererOptions = Object.assign({}, {patchProp: patchProp},
     nodeOps);
 
-var unwrap = function (v) { return isRef(v) ? v.value : v; };
-
 /**
  * LookupPlugin
  * @param {Object} configuration
@@ -3268,14 +3317,12 @@ function LookupPlugin (ref) {
 
   return function (baseReturns) {
     var parsedSchema = baseReturns.parsedSchema;
-    parsedSchema = unwrap(parsedSchema);
 
-    var replacedSchema = mapProperties(parsedSchema, mapProps);
-
+    var replacedSchema = mapProperties(parsedSchema.value, mapProps);
     replacedSchema = mapComps(replacedSchema, mapComponents);
 
     return Object.assign({}, baseReturns,
-      {parsedSchema: replacedSchema})
+      {parsedSchema: computed$$1(function () { return replacedSchema; })})
   }
 }
 
@@ -3303,10 +3350,8 @@ var mapComps = function (schema, mapComponents) {
  * @returns {Array}
  */
 var mapProperties = function (schema, mapProps) {
-  var schemaCopy = [].concat( schema );
-
   if (typeof mapProps === 'function') {
-    schemaCopy = schemaCopy.map(function (el) {
+    return schema.map(function (el) {
       var replacedEl = el;
       var map = mapProps(replacedEl);
       for (var prop in map) {
@@ -3316,12 +3361,13 @@ var mapProperties = function (schema, mapProps) {
       }
 
       return replacedEl
-    });
+    })
   }
 
+  var schemaCopy;
   if (typeof mapProps === 'object') {
     var loop = function ( prop ) {
-      schemaCopy = schemaCopy.map(function (el) {
+      schemaCopy = schema.map(function (el) {
         return replacePropInElement(el, prop, mapProps[prop])
       });
     };
