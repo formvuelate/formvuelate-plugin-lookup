@@ -1,6 +1,7 @@
+import { computed } from 'vue'
 import LookupPlugin from '../src/index.js'
 
-const schema = [
+const rawSchema = [
   {
     "model": "firstName",
     "type": "FormText",
@@ -25,8 +26,8 @@ const schema = [
   }
 ]
 
+const schema = computed(() => rawSchema)
 const warn = jest.spyOn(console, 'warn').mockImplementation();
-const currentENV = process.env ? process.env.NODE_ENV : null
 
 describe('Lookup Plugin', () => {
   beforeEach(() => jest.clearAllMocks())
@@ -44,11 +45,11 @@ describe('Lookup Plugin', () => {
       })
       const { parsedSchema } = lookup({ parsedSchema: schema })
 
-      for (let el of parsedSchema) {
+      for (let el of parsedSchema.value) {
         expect(el.component).not.toEqual('FormText')
       }
 
-      expect(parsedSchema[0].component).toEqual('BaseInput')
+      expect(parsedSchema.value[0].component).toEqual('BaseInput')
     })
   })
 
@@ -61,7 +62,7 @@ describe('Lookup Plugin', () => {
       })
       const { parsedSchema } = lookup({ parsedSchema: schema })
 
-      for (let el of parsedSchema) {
+      for (let el of parsedSchema.value) {
         expect('tag' in el).toEqual(true)
         expect('label' in el).toEqual(false)
       }
@@ -87,10 +88,10 @@ describe('Lookup Plugin', () => {
 
       const { parsedSchema } = lookup({ parsedSchema: schema })
 
-      expect('mappable' in parsedSchema[0]).toBe(false)
-      expect('remapped' in parsedSchema[0]).toBe(true)
+      expect('mappable' in parsedSchema.value[0]).toBe(false)
+      expect('remapped' in parsedSchema.value[0]).toBe(true)
 
-      for (let el of parsedSchema) {
+      for (let el of parsedSchema.value) {
         expect('component' in el).toEqual(true)
         expect('type' in el).toEqual(false)
       }
@@ -112,7 +113,7 @@ describe('Lookup Plugin', () => {
 
       const { parsedSchema } = lookup({ parsedSchema: schema })
 
-      for (let el of parsedSchema) {
+      for (let el of parsedSchema.value) {
         expect('nameable' in el).toEqual(el.component === 'First Name' ? true : false)
       }
     })
@@ -141,7 +142,7 @@ describe('Lookup Plugin', () => {
         })
         const { parsedSchema } = lookup({ parsedSchema: schema })
 
-        for (let el of parsedSchema) {
+        for (let el of parsedSchema.value) {
           expect('label' in el).toEqual(false)
         }
       })
@@ -157,7 +158,7 @@ describe('Lookup Plugin', () => {
 
         const { parsedSchema } = lookup({ parsedSchema: schema })
 
-        for (let el of parsedSchema) {
+        for (let el of parsedSchema.value) {
           expect('label' in el).toEqual(false)
         }
       })

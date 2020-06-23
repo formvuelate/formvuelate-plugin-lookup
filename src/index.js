@@ -1,5 +1,4 @@
-import { isRef } from 'vue'
-const unwrap = v => isRef(v) ? v.value : v
+import { computed } from 'vue'
 
 /**
  * LookupPlugin
@@ -12,15 +11,13 @@ const unwrap = v => isRef(v) ? v.value : v
 export default function LookupPlugin ({ mapComponents = {}, mapProps = {} }) {
   return function (baseReturns) {
     let { parsedSchema } = baseReturns
-    parsedSchema = unwrap(parsedSchema)
 
-    let replacedSchema = mapProperties(parsedSchema, mapProps)
-
+    let replacedSchema = mapProperties(parsedSchema.value, mapProps)
     replacedSchema = mapComps(replacedSchema, mapComponents)
 
     return {
       ...baseReturns,
-      parsedSchema: replacedSchema
+      parsedSchema: computed(() => replacedSchema)
     }
   }
 }
@@ -51,10 +48,8 @@ const mapComps = (schema, mapComponents) => {
  * @returns {Array}
  */
 const mapProperties = (schema, mapProps) => {
-  let schemaCopy = [...schema]
-
   if (typeof mapProps === 'function') {
-    schemaCopy = schemaCopy.map(el => {
+    return schema.map(el => {
       let replacedEl = el
       const map = mapProps(replacedEl)
       for (const prop in map) {
@@ -67,9 +62,10 @@ const mapProperties = (schema, mapProps) => {
     })
   }
 
+  let schemaCopy
   if (typeof mapProps === 'object') {
     for (const prop in mapProps) {
-      schemaCopy = schemaCopy.map(el => {
+      schemaCopy = schema.map(el => {
         return replacePropInElement(el, prop, mapProps[prop])
       })
     }
