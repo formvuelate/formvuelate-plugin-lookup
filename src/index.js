@@ -1,5 +1,4 @@
-import { isRef } from 'vue'
-const unwrap = v => isRef(v) ? v.value : v
+import { computed, unref } from 'vue'
 
 /**
  * LookupPlugin
@@ -12,7 +11,9 @@ const unwrap = v => isRef(v) ? v.value : v
 export default function LookupPlugin ({ mapComponents = {}, mapProps = {} }) {
   return function (baseReturns) {
     let { parsedSchema } = baseReturns
-    parsedSchema = unwrap(parsedSchema)
+
+    // parsedSchema should always be a computed
+    parsedSchema = parsedSchema.value
 
     let replacedSchema = mapProperties(parsedSchema, mapProps)
 
@@ -20,7 +21,7 @@ export default function LookupPlugin ({ mapComponents = {}, mapProps = {} }) {
 
     return {
       ...baseReturns,
-      parsedSchema: replacedSchema
+      parsedSchema: computed(() => replacedSchema)
     }
   }
 }
