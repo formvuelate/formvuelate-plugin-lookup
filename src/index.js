@@ -12,11 +12,7 @@ export default function LookupPlugin ({ mapComponents = {}, mapProps = {} }) {
   return function (baseReturns) {
     let { parsedSchema } = baseReturns
 
-    // parsedSchema should always be a computed
-    parsedSchema = parsedSchema.value
-
-    let replacedSchema = mapProperties(parsedSchema, mapProps)
-
+    let replacedSchema = mapProperties(parsedSchema.value, mapProps)
     replacedSchema = mapComps(replacedSchema, mapComponents)
 
     return {
