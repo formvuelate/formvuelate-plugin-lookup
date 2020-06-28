@@ -10,7 +10,7 @@ import { computed } from 'vue'
  */
 export default function LookupPlugin ({ mapComponents = {}, mapProps = {} }) {
   return function (baseReturns) {
-    let { parsedSchema } = baseReturns
+    const { parsedSchema } = baseReturns
 
     let replacedSchema = mapProperties(parsedSchema.value, mapProps)
     replacedSchema = mapComps(replacedSchema, mapComponents)
