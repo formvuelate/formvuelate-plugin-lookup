@@ -23,5 +23,7 @@ jobs:
       uses: actions/setup-node@v1
       with:
         node-version: 13
+    - name: Lint
+      run: yarn lint
     - name: Run tests
       run: yarn && yarn test:unit
