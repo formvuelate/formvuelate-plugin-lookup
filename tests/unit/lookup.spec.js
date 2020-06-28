@@ -1,33 +1,33 @@
 import { computed } from 'vue'
-import LookupPlugin from '../src/index.js'
+import LookupPlugin from '../../src/index.js'
 
 const rawSchema = [
   {
-    "model": "firstName",
-    "type": "FormText",
-    "label": "First Name",
-    "mappable": true,
-    "unique": false
+    model: 'firstName',
+    type: 'FormText',
+    label: 'First Name',
+    mappable: true,
+    unique: false
   },
   {
-    "label": "Favorite thing about Vue",
-    "required": true,
-    "model": "favoriteThingAboutVue",
-    "type": "FormSelect",
-    "mappable": true,
-    "unique": false
+    label: 'Favorite thing about Vue',
+    required: true,
+    model: 'favoriteThingAboutVue',
+    type: 'FormSelect',
+    mappable: true,
+    unique: false
   },
   {
-    "label": "Are you a Vue fan?",
-    "model": "isVueFan",
-    "type": "FormCheckbox",
-    "mappable": true,
-    "unique": false
+    label: 'Are you a Vue fan?',
+    model: 'isVueFan',
+    type: 'FormCheckbox',
+    mappable: true,
+    unique: false
   }
 ]
 
 const schema = computed(() => rawSchema)
-const warn = jest.spyOn(console, 'warn').mockImplementation();
+const warn = jest.spyOn(console, 'warn').mockImplementation()
 
 describe('Lookup Plugin', () => {
   beforeEach(() => jest.clearAllMocks())
@@ -37,7 +37,7 @@ describe('Lookup Plugin', () => {
     it('maps an key value object of components inside the schema', () => {
       const lookup = LookupPlugin({
         mapComponents: {
-          'FormText': 'BaseInput'
+          FormText: 'BaseInput'
         },
         mapProps: {
           type: 'component'
@@ -45,7 +45,7 @@ describe('Lookup Plugin', () => {
       })
       const { parsedSchema } = lookup({ parsedSchema: schema })
 
-      for (let el of parsedSchema.value) {
+      for (const el of parsedSchema.value) {
         expect(el.component).not.toEqual('FormText')
       }
 
@@ -62,7 +62,7 @@ describe('Lookup Plugin', () => {
       })
       const { parsedSchema } = lookup({ parsedSchema: schema })
 
-      for (let el of parsedSchema.value) {
+      for (const el of parsedSchema.value) {
         expect('tag' in el).toEqual(true)
         expect('label' in el).toEqual(false)
       }
@@ -91,7 +91,7 @@ describe('Lookup Plugin', () => {
       expect('mappable' in parsedSchema.value[0]).toBe(false)
       expect('remapped' in parsedSchema.value[0]).toBe(true)
 
-      for (let el of parsedSchema.value) {
+      for (const el of parsedSchema.value) {
         expect('component' in el).toEqual(true)
         expect('type' in el).toEqual(false)
       }
@@ -102,7 +102,7 @@ describe('Lookup Plugin', () => {
         mapProps: {
           type: 'component',
           mappable: (el) => {
-            if (el.label === "First Name") {
+            if (el.label === 'First Name') {
               return 'nameable'
             }
 
@@ -113,8 +113,8 @@ describe('Lookup Plugin', () => {
 
       const { parsedSchema } = lookup({ parsedSchema: schema })
 
-      for (let el of parsedSchema.value) {
-        expect('nameable' in el).toEqual(el.component === 'First Name' ? true : false)
+      for (const el of parsedSchema.value) {
+        expect('nameable' in el).toEqual(el.component === 'First Name')
       }
     })
 
@@ -142,7 +142,7 @@ describe('Lookup Plugin', () => {
         })
         const { parsedSchema } = lookup({ parsedSchema: schema })
 
-        for (let el of parsedSchema.value) {
+        for (const el of parsedSchema.value) {
           expect('label' in el).toEqual(false)
         }
       })
@@ -158,7 +158,7 @@ describe('Lookup Plugin', () => {
 
         const { parsedSchema } = lookup({ parsedSchema: schema })
 
-        for (let el of parsedSchema.value) {
+        for (const el of parsedSchema.value) {
           expect('label' in el).toEqual(false)
         }
       })
