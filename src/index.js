@@ -84,11 +84,10 @@ const mapProperties = (schema, mapProps) => {
  */
 const replacePropInElement = (el, prop, replacement) => {
   let propReplacement = replacement
-
-  // If replacement is a function, call it to get
-  // the prop to be replaced. If its falsey, then return
-  // the element as is
   if (typeof replacement === 'function') {
+    // If replacement is a function, call it to get
+    // the prop to be replaced. If its falsey, then return
+    // the element as is
     propReplacement = replacement(el)
 
     if (!propReplacement) return el
@@ -96,7 +95,7 @@ const replacePropInElement = (el, prop, replacement) => {
 
   if (!(prop in el)) {
     if (process.env && process.env.NODE_ENV !== 'production') {
-      console.warn(`LookupPlugin: prop "${prop}" not found in`, el)
+      console.warn(`LookupPlugin: property "${prop}" not found in`, el)
     }
 
     // Return the el without replacing
