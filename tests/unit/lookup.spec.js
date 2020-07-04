@@ -1,5 +1,5 @@
 import { computed } from 'vue'
-import LookupPlugin from '../../src/index.js'
+import LookupPlugin, { loopElementsInSchema } from '../../src/index.js'
 
 const rawSchema = [
   [
@@ -47,9 +47,9 @@ describe('Lookup Plugin', () => {
       })
       const { parsedSchema } = lookup({ parsedSchema: schema })
 
-      for (const el of parsedSchema.value) {
+      loopElementsInSchema(parsedSchema.value, el => {
         expect(el.component).not.toEqual('FormText')
-      }
+      })
 
       expect(parsedSchema.value[0][0].component).toEqual('BaseInput')
       expect(parsedSchema.value[1][0].component).toEqual('BaseSelect')
@@ -66,12 +66,10 @@ describe('Lookup Plugin', () => {
       })
       const { parsedSchema } = lookup({ parsedSchema: schema })
 
-      for (const row of parsedSchema.value) {
-        for (const el of row) {
-          expect('tag' in el).toEqual(true)
-          expect('label' in el).toEqual(false)
-        }
-      }
+      loopElementsInSchema(parsedSchema.value, el => {
+        expect('tag' in el).toEqual(true)
+        expect('label' in el).toEqual(false)
+      })
     })
 
     it('can receive a function to create the mapping', () => {
@@ -127,12 +125,11 @@ describe('Lookup Plugin', () => {
 
       expect('mappable' in parsedSchema.value[0][0]).toBe(false)
       expect('remapped' in parsedSchema.value[0][0]).toBe(true)
-      for (const row of parsedSchema.value) {
-        for (const el of row) {
-          expect('component' in el).toEqual(true)
-          expect('type' in el).toEqual(false)
-        }
-      }
+
+      loopElementsInSchema(parsedSchema.value, el => {
+        expect('component' in el).toEqual(true)
+        expect('type' in el).toEqual(false)
+      })
     })
 
     it('can map a prop as a function', () => {
@@ -150,7 +147,9 @@ describe('Lookup Plugin', () => {
 
       const { parsedSchema } = lookup({ parsedSchema: schema })
 
-      expect('nameable' in parsedSchema.value[0][0]).toBe(true)
+      loopElementsInSchema(parsedSchema.value, el => {
+        expect('nameable' in el).toBe(el.label === 'First Name')
+      })
     })
 
     describe('warnings', () => {
@@ -177,9 +176,9 @@ describe('Lookup Plugin', () => {
         })
         const { parsedSchema } = lookup({ parsedSchema: schema })
 
-        for (const el of parsedSchema.value) {
+        loopElementsInSchema(parsedSchema.value, el => {
           expect('label' in el).toEqual(false)
-        }
+        })
       })
 
       it('can delete a property through a function', () => {
@@ -193,9 +192,9 @@ describe('Lookup Plugin', () => {
 
         const { parsedSchema } = lookup({ parsedSchema: schema })
 
-        for (const el of parsedSchema.value) {
+        loopElementsInSchema(parsedSchema.value, el => {
           expect('label' in el).toEqual(false)
-        }
+        })
       })
     })
   })
