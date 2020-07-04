@@ -164,7 +164,7 @@ describe('Lookup Plugin', () => {
         lookup({ parsedSchema: schema })
 
         expect(warn).toHaveBeenCalledTimes(3)
-        expect(warn).toHaveBeenCalledWith(expect.stringContaining('prop "foo" not found'), expect.anything())
+        expect(warn).toHaveBeenCalledWith(expect.stringContaining('property "foo" not found'), expect.anything())
       })
     })
 
