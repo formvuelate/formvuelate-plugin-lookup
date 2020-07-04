@@ -8,7 +8,7 @@ import { computed } from 'vue'
  *
  * @returns {Function}
  */
-export default function LookupPlugin ({ mapComponents = {}, mapProps = {} }) {
+export default function LookupPlugin ({ mapComponents = {}, mapProps = null }) {
   return function (baseReturns) {
     const { parsedSchema } = baseReturns
 
@@ -22,6 +22,8 @@ export default function LookupPlugin ({ mapComponents = {}, mapProps = {} }) {
   }
 }
 
+export const loopElementsInSchema = (schema, fn) => schema.map(row => row.map(el => fn(el)))
+
 /**
  * Remap components in a schema
  * @param {Array} schema - The schema
@@ -29,7 +31,7 @@ export default function LookupPlugin ({ mapComponents = {}, mapProps = {} }) {
 * @returns {Array}
  */
 const mapComps = (schema, mapComponents) => {
-  return schema.map(el => {
+  return schema.map(row => row.map(el => {
     const newKey = mapComponents[el.component]
 
     if (!newKey) return { ...el }
@@ -38,7 +40,7 @@ const mapComps = (schema, mapComponents) => {
       ...el,
       component: mapComponents[el.component]
     }
-  })
+  }))
 }
 
 /**
@@ -48,8 +50,10 @@ const mapComps = (schema, mapComponents) => {
  * @returns {Array}
  */
 const mapProperties = (schema, mapProps) => {
+  if (!mapProps || !['object', 'function'].includes(typeof mapProps)) return schema
+
   if (typeof mapProps === 'function') {
-    return schema.map(el => {
+    return loopElementsInSchema(schema, el => {
       let replacedEl = el
       const map = mapProps(replacedEl)
       for (const prop in map) {
@@ -63,12 +67,10 @@ const mapProperties = (schema, mapProps) => {
   }
 
   let schemaCopy
-  if (typeof mapProps === 'object') {
-    for (const prop in mapProps) {
-      schemaCopy = schema.map(el => {
-        return replacePropInElement(el, prop, mapProps[prop])
-      })
-    }
+  for (const prop in mapProps) {
+    schemaCopy = loopElementsInSchema(schema, el => {
+      return replacePropInElement(el, prop, mapProps[prop])
+    })
   }
 
   return schemaCopy
@@ -81,36 +83,36 @@ const mapProperties = (schema, mapProps) => {
  * @param {String|Function|Boolean} replacement - The replacement for the prop, a function that returns it or the boolean "false" to delete it
  */
 const replacePropInElement = (el, prop, replacement) => {
-  let propToBeReplaced = prop
+  let propReplacement = replacement
 
   // If replacement is a function, call it to get
   // the prop to be replaced. If its falsey, then return
   // the element as is
   if (typeof replacement === 'function') {
-    propToBeReplaced = replacement(el)
-    if (!propToBeReplaced) return el
+    propReplacement = replacement(el)
+
+    if (!propReplacement) return el
   }
 
-  if (!(propToBeReplaced in el)) {
+  if (!(prop in el)) {
     if (process.env && process.env.NODE_ENV !== 'production') {
-      console.warn(`LookupPlugin: prop "${propToBeReplaced}" not found in`, el)
+      console.warn(`LookupPlugin: prop "${prop}" not found in`, el)
     }
 
+    // Return the el without replacing
     return el
   }
 
-  const originalValue = el[propToBeReplaced]
+  const originalValue = el[prop]
   const elementCopy = { ...el }
 
-  if (replacement === false) {
-    delete elementCopy[propToBeReplaced]
+  delete elementCopy[prop]
 
+  if (propReplacement === false) {
     return elementCopy
   }
 
-  delete elementCopy[propToBeReplaced]
-
-  elementCopy[replacement] = originalValue
+  elementCopy[propReplacement] = originalValue
 
   return elementCopy
 }
