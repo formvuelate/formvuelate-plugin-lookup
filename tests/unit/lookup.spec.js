@@ -1,5 +1,5 @@
 import { computed } from 'vue'
-import LookupPlugin, { loopElementsInSchema } from '../../src/index.js'
+import LookupPlugin, { mapElementsInSchema } from '../../src/index.js'
 
 const rawSchema = [
   [
@@ -47,7 +47,7 @@ describe('Lookup Plugin', () => {
       })
       const { parsedSchema } = lookup({ parsedSchema: schema })
 
-      loopElementsInSchema(parsedSchema.value, el => {
+      mapElementsInSchema(parsedSchema.value, el => {
         expect(el.component).not.toEqual('FormText')
       })
 
@@ -66,7 +66,7 @@ describe('Lookup Plugin', () => {
       })
       const { parsedSchema } = lookup({ parsedSchema: schema })
 
-      loopElementsInSchema(parsedSchema.value, el => {
+      mapElementsInSchema(parsedSchema.value, el => {
         expect('tag' in el).toEqual(true)
         expect('label' in el).toEqual(false)
       })
@@ -126,7 +126,7 @@ describe('Lookup Plugin', () => {
       expect('mappable' in parsedSchema.value[0][0]).toBe(false)
       expect('remapped' in parsedSchema.value[0][0]).toBe(true)
 
-      loopElementsInSchema(parsedSchema.value, el => {
+      mapElementsInSchema(parsedSchema.value, el => {
         expect('component' in el).toEqual(true)
         expect('type' in el).toEqual(false)
       })
@@ -147,7 +147,7 @@ describe('Lookup Plugin', () => {
 
       const { parsedSchema } = lookup({ parsedSchema: schema })
 
-      loopElementsInSchema(parsedSchema.value, el => {
+      mapElementsInSchema(parsedSchema.value, el => {
         expect('nameable' in el).toBe(el.label === 'First Name')
       })
     })
@@ -176,7 +176,7 @@ describe('Lookup Plugin', () => {
         })
         const { parsedSchema } = lookup({ parsedSchema: schema })
 
-        loopElementsInSchema(parsedSchema.value, el => {
+        mapElementsInSchema(parsedSchema.value, el => {
           expect('label' in el).toEqual(false)
         })
       })
@@ -192,7 +192,7 @@ describe('Lookup Plugin', () => {
 
         const { parsedSchema } = lookup({ parsedSchema: schema })
 
-        loopElementsInSchema(parsedSchema.value, el => {
+        mapElementsInSchema(parsedSchema.value, el => {
           expect('label' in el).toEqual(false)
         })
       })

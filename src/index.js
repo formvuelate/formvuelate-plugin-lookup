@@ -22,7 +22,7 @@ export default function LookupPlugin ({ mapComponents = {}, mapProps = null }) {
   }
 }
 
-export const loopElementsInSchema = (schema, fn) => schema.map(row => row.map(el => fn(el)))
+export const mapElementsInSchema = (schema, fn) => schema.map(row => row.map(el => fn(el)))
 
 /**
  * Remap components in a schema
@@ -53,7 +53,7 @@ const mapProperties = (schema, mapProps) => {
   if (!mapProps || !['object', 'function'].includes(typeof mapProps)) return schema
 
   if (typeof mapProps === 'function') {
-    return loopElementsInSchema(schema, el => {
+    return mapElementsInSchema(schema, el => {
       let replacedEl = el
       const map = mapProps(replacedEl)
       for (const prop in map) {
@@ -68,7 +68,7 @@ const mapProperties = (schema, mapProps) => {
 
   let schemaCopy
   for (const prop in mapProps) {
-    schemaCopy = loopElementsInSchema(schema, el => {
+    schemaCopy = mapElementsInSchema(schema, el => {
       return replacePropInElement(el, prop, mapProps[prop])
     })
   }
