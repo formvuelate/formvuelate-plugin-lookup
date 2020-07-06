@@ -1,29 +1,33 @@
 import { computed } from 'vue'
-import LookupPlugin from '../../src/index.js'
+import LookupPlugin, { mapElementsInSchema } from '../../src/index.js'
 
 const rawSchema = [
-  {
-    model: 'firstName',
-    type: 'FormText',
-    label: 'First Name',
-    mappable: true,
-    unique: false
-  },
-  {
-    label: 'Favorite thing about Vue',
-    required: true,
-    model: 'favoriteThingAboutVue',
-    type: 'FormSelect',
-    mappable: true,
-    unique: false
-  },
-  {
-    label: 'Are you a Vue fan?',
-    model: 'isVueFan',
-    type: 'FormCheckbox',
-    mappable: true,
-    unique: false
-  }
+  [
+    {
+      model: 'firstName',
+      component: 'FormText',
+      label: 'First Name',
+      mappable: true,
+      unique: false
+    }
+  ],
+  [
+    {
+      label: 'Favorite thing about Vue',
+      required: true,
+      model: 'favoriteThingAboutVue',
+      component: 'FormSelect',
+      mappable: true,
+      unique: false
+    },
+    {
+      label: 'Are you a Vue fan?',
+      model: 'isVueFan',
+      component: 'FormCheckbox',
+      mappable: true,
+      unique: false
+    }
+  ]
 ]
 
 const schema = computed(() => rawSchema)
@@ -34,22 +38,22 @@ describe('Lookup Plugin', () => {
   afterAll(() => warn.mockRestore())
 
   describe('mapComponents', () => {
-    it('maps an key value object of components inside the schema', () => {
+    it('maps a key value object of components inside the schema', () => {
       const lookup = LookupPlugin({
         mapComponents: {
-          FormText: 'BaseInput'
-        },
-        mapProps: {
-          type: 'component'
+          FormText: 'BaseInput',
+          FormSelect: 'BaseSelect'
         }
       })
       const { parsedSchema } = lookup({ parsedSchema: schema })
 
-      for (const el of parsedSchema.value) {
+      mapElementsInSchema(parsedSchema.value, el => {
         expect(el.component).not.toEqual('FormText')
-      }
+      })
 
-      expect(parsedSchema.value[0].component).toEqual('BaseInput')
+      expect(parsedSchema.value[0][0].component).toEqual('BaseInput')
+      expect(parsedSchema.value[1][0].component).toEqual('BaseSelect')
+      expect(parsedSchema.value[1][1].component).toEqual('FormCheckbox')
     })
   })
 
@@ -62,13 +66,44 @@ describe('Lookup Plugin', () => {
       })
       const { parsedSchema } = lookup({ parsedSchema: schema })
 
-      for (const el of parsedSchema.value) {
+      mapElementsInSchema(parsedSchema.value, el => {
         expect('tag' in el).toEqual(true)
         expect('label' in el).toEqual(false)
-      }
+      })
     })
 
     it('can receive a function to create the mapping', () => {
+      const rawSchema = [
+        [
+          {
+            model: 'firstName',
+            type: 'FormText',
+            label: 'First Name',
+            mappable: true,
+            unique: false
+          }
+        ],
+        [
+          {
+            label: 'Favorite thing about Vue',
+            required: true,
+            model: 'favoriteThingAboutVue',
+            type: 'FormSelect',
+            mappable: true,
+            unique: false
+          },
+          {
+            label: 'Are you a Vue fan?',
+            model: 'isVueFan',
+            type: 'FormCheckbox',
+            mappable: true,
+            unique: false
+          }
+        ]
+      ]
+
+      const schema = computed(() => rawSchema)
+
       const mapper = jest.fn((el) => {
         if (el.type === 'FormText') {
           return {
@@ -88,19 +123,18 @@ describe('Lookup Plugin', () => {
 
       const { parsedSchema } = lookup({ parsedSchema: schema })
 
-      expect('mappable' in parsedSchema.value[0]).toBe(false)
-      expect('remapped' in parsedSchema.value[0]).toBe(true)
+      expect('mappable' in parsedSchema.value[0][0]).toBe(false)
+      expect('remapped' in parsedSchema.value[0][0]).toBe(true)
 
-      for (const el of parsedSchema.value) {
+      mapElementsInSchema(parsedSchema.value, el => {
         expect('component' in el).toEqual(true)
         expect('type' in el).toEqual(false)
-      }
+      })
     })
 
     it('can map a prop as a function', () => {
       const lookup = LookupPlugin({
         mapProps: {
-          type: 'component',
           mappable: (el) => {
             if (el.label === 'First Name') {
               return 'nameable'
@@ -113,9 +147,9 @@ describe('Lookup Plugin', () => {
 
       const { parsedSchema } = lookup({ parsedSchema: schema })
 
-      for (const el of parsedSchema.value) {
-        expect('nameable' in el).toEqual(el.component === 'First Name')
-      }
+      mapElementsInSchema(parsedSchema.value, el => {
+        expect('nameable' in el).toBe(el.label === 'First Name')
+      })
     })
 
     describe('warnings', () => {
@@ -129,7 +163,7 @@ describe('Lookup Plugin', () => {
         lookup({ parsedSchema: schema })
 
         expect(warn).toHaveBeenCalledTimes(3)
-        expect(warn).toHaveBeenCalledWith(expect.stringContaining('prop "foo" not found'), expect.anything())
+        expect(warn).toHaveBeenCalledWith(expect.stringContaining('property "foo" not found'), expect.anything())
       })
     })
 
@@ -142,9 +176,9 @@ describe('Lookup Plugin', () => {
         })
         const { parsedSchema } = lookup({ parsedSchema: schema })
 
-        for (const el of parsedSchema.value) {
+        mapElementsInSchema(parsedSchema.value, el => {
           expect('label' in el).toEqual(false)
-        }
+        })
       })
 
       it('can delete a property through a function', () => {
@@ -158,9 +192,9 @@ describe('Lookup Plugin', () => {
 
         const { parsedSchema } = lookup({ parsedSchema: schema })
 
-        for (const el of parsedSchema.value) {
+        mapElementsInSchema(parsedSchema.value, el => {
           expect('label' in el).toEqual(false)
-        }
+        })
       })
     })
   })
