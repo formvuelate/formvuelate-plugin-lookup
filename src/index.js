@@ -22,16 +22,24 @@ export default function LookupPlugin ({ mapComponents = {}, mapProps = null }) {
   }
 }
 
+/**
+ * For a Schema, find the elements in each of the rows and remap the element with the given function
+ * @param {Array} schema
+ * @param {Function} fn
+ *
+ * @returns {Array}
+ */
 export const mapElementsInSchema = (schema, fn) => schema.map(row => row.map(el => fn(el)))
 
 /**
  * Remap components in a schema
  * @param {Array} schema - The schema
  * @param {Object|Function} mapComponents
+ *
 * @returns {Array}
  */
 const mapComps = (schema, mapComponents) => {
-  return schema.map(row => row.map(el => {
+  return mapElementsInSchema(schema, el => {
     const newKey = mapComponents[el.component]
 
     if (!newKey) return { ...el }
@@ -40,30 +48,21 @@ const mapComps = (schema, mapComponents) => {
       ...el,
       component: mapComponents[el.component]
     }
-  }))
+  })
 }
 
 /**
  * Remap properties in a schema
  * @param {Array} schema - The schema
  * @param {Function|Object} mapProps - A key pair value object or function that returns it
+ *
  * @returns {Array}
  */
 const mapProperties = (schema, mapProps) => {
   if (!mapProps || !['object', 'function'].includes(typeof mapProps)) return schema
 
   if (typeof mapProps === 'function') {
-    return mapElementsInSchema(schema, el => {
-      let replacedEl = el
-      const map = mapProps(replacedEl)
-      for (const prop in map) {
-        replacedEl = replacePropInElement(
-          replacedEl, prop, map[prop]
-        )
-      }
-
-      return replacedEl
-    })
+    return mapPropertiesWithUserFunction(schema, mapProps)
   }
 
   let schemaCopy
@@ -77,10 +76,36 @@ const mapProperties = (schema, mapProps) => {
 }
 
 /**
+ * Remap properties using a user defined function
+ * @param {Array} schema
+ * @param {Function} fn
+ *
+ * @returns {Array} - Parsed schema
+ */
+const mapPropertiesWithUserFunction = (schema, fn) => {
+  const mapPropsForElement = (el, fn) => {
+    const map = fn(el)
+    for (const prop in map) {
+      el = replacePropInElement(
+        el, prop, map[prop]
+      )
+    }
+
+    return el
+  }
+
+  return mapElementsInSchema(schema, el => {
+    return mapPropsForElement(el, fn)
+  })
+}
+
+/**
  *
  * @param {Object} el - The element to replace props in
  * @param {String} prop - The prop to replace or fn to pick the prop
  * @param {String|Function|Boolean} replacement - The replacement for the prop, a function that returns it or the boolean "false" to delete it
+ *
+ * @returns {Object} - The replaced element
  */
 const replacePropInElement = (el, prop, replacement) => {
   let propReplacement = replacement
