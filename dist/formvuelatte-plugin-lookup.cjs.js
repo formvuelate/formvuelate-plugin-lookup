@@ -6,6 +6,8 @@
 
 'use strict';
 
+Object.defineProperty(exports, '__esModule', { value: true });
+
 // Make a map and return a function for checking if a key
 // is in that map.
 //
@@ -3313,7 +3315,7 @@ var rendererOptions = Object.assign({}, {patchProp: patchProp},
  */
 function LookupPlugin (ref) {
   var mapComponents = ref.mapComponents; if ( mapComponents === void 0 ) mapComponents = {};
-  var mapProps = ref.mapProps; if ( mapProps === void 0 ) mapProps = {};
+  var mapProps = ref.mapProps; if ( mapProps === void 0 ) mapProps = null;
 
   return function (baseReturns) {
     var parsedSchema = baseReturns.parsedSchema;
@@ -3327,13 +3329,23 @@ function LookupPlugin (ref) {
 }
 
 /**
+ * For a Schema, find the elements in each of the rows and remap the element with the given function
+ * @param {Array} schema
+ * @param {Function} fn
+ *
+ * @returns {Array}
+ */
+var mapElementsInSchema = function (schema, fn) { return schema.map(function (row) { return row.map(function (el) { return fn(el); }); }); };
+
+/**
  * Remap components in a schema
  * @param {Array} schema - The schema
  * @param {Object|Function} mapComponents
+ *
 * @returns {Array}
  */
 var mapComps = function (schema, mapComponents) {
-  return schema.map(function (el) {
+  return mapElementsInSchema(schema, function (el) {
     var newKey = mapComponents[el.component];
 
     if (!newKey) { return Object.assign({}, el) }
@@ -3347,35 +3359,50 @@ var mapComps = function (schema, mapComponents) {
  * Remap properties in a schema
  * @param {Array} schema - The schema
  * @param {Function|Object} mapProps - A key pair value object or function that returns it
+ *
  * @returns {Array}
  */
 var mapProperties = function (schema, mapProps) {
-  if (typeof mapProps === 'function') {
-    return schema.map(function (el) {
-      var replacedEl = el;
-      var map = mapProps(replacedEl);
-      for (var prop in map) {
-        replacedEl = replacePropInElement(
-          replacedEl, prop, map[prop]
-        );
-      }
+  if (!mapProps || !['object', 'function'].includes(typeof mapProps)) { return schema }
 
-      return replacedEl
-    })
+  if (typeof mapProps === 'function') {
+    return mapPropertiesWithUserFunction(schema, mapProps)
   }
 
   var schemaCopy;
-  if (typeof mapProps === 'object') {
-    var loop = function ( prop ) {
-      schemaCopy = schema.map(function (el) {
-        return replacePropInElement(el, prop, mapProps[prop])
-      });
-    };
+  var loop = function ( prop ) {
+    schemaCopy = mapElementsInSchema(schema, function (el) {
+      return replacePropInElement(el, prop, mapProps[prop])
+    });
+  };
 
-    for (var prop in mapProps) loop( prop );
-  }
+  for (var prop in mapProps) loop( prop );
 
   return schemaCopy
+};
+
+/**
+ * Remap properties using a user defined function
+ * @param {Array} schema
+ * @param {Function} fn
+ *
+ * @returns {Array} - Parsed schema
+ */
+var mapPropertiesWithUserFunction = function (schema, fn) {
+  var mapPropsForElement = function (el, fn) {
+    var map = fn(el);
+    for (var prop in map) {
+      el = replacePropInElement(
+        el, prop, map[prop]
+      );
+    }
+
+    return el
+  };
+
+  return mapElementsInSchema(schema, function (el) {
+    return mapPropsForElement(el, fn)
+  })
 };
 
 /**
@@ -3383,40 +3410,42 @@ var mapProperties = function (schema, mapProps) {
  * @param {Object} el - The element to replace props in
  * @param {String} prop - The prop to replace or fn to pick the prop
  * @param {String|Function|Boolean} replacement - The replacement for the prop, a function that returns it or the boolean "false" to delete it
+ *
+ * @returns {Object} - The replaced element
  */
 var replacePropInElement = function (el, prop, replacement) {
-  var propToBeReplaced = prop;
-
-  // If replacement is a function, call it to get
-  // the prop to be replaced. If its falsey, then return
-  // the element as is
+  var propReplacement = replacement;
   if (typeof replacement === 'function') {
-    propToBeReplaced = replacement(el);
-    if (!propToBeReplaced) { return el }
+    // If replacement is a function, call it to get
+    // the prop to be replaced. If its falsey, then return
+    // the element as is
+    propReplacement = replacement(el);
+
+    if (!propReplacement) { return el }
   }
 
-  if (!(propToBeReplaced in el)) {
+  if (!(prop in el)) {
     if (process.env && "development" !== 'production') {
-      console.warn(("LookupPlugin: prop \"" + propToBeReplaced + "\" not found in"), el);
+      console.warn(("LookupPlugin: property \"" + prop + "\" not found in"), el);
     }
 
+    // Return the el without replacing
     return el
   }
 
-  var originalValue = el[propToBeReplaced];
+  var originalValue = el[prop];
   var elementCopy = Object.assign({}, el);
 
-  if (replacement === false) {
-    delete elementCopy[propToBeReplaced];
+  delete elementCopy[prop];
 
+  if (propReplacement === false) {
     return elementCopy
   }
 
-  delete elementCopy[propToBeReplaced];
-
-  elementCopy[replacement] = originalValue;
+  elementCopy[propReplacement] = originalValue;
 
   return elementCopy
 };
 
-module.exports = LookupPlugin;
+exports['default'] = LookupPlugin;
+exports.mapElementsInSchema = mapElementsInSchema;
