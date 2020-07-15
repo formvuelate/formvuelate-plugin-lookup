@@ -1,8 +1,12 @@
 /**
- * @formvuelatte/plugin-lookup v1.1.2
+ * @formvuelate/plugin-lookup v1.2.0
  * (c) 2020 Marina Mosti <marina@mosti.com.mx>
  * @license MIT
  */
+
+'use strict';
+
+Object.defineProperty(exports, '__esModule', { value: true });
 
 // Make a map and return a function for checking if a key
 // is in that map.
@@ -3443,5 +3447,5 @@ var replacePropInElement = function (el, prop, replacement) {
   return elementCopy
 };
 
-export { mapElementsInSchema };
-export default LookupPlugin;
+exports['default'] = LookupPlugin;
+exports.mapElementsInSchema = mapElementsInSchema;

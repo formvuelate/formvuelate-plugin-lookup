@@ -1,15 +1,15 @@
 {
-  "name": "@formvuelatte/plugin-lookup",
-  "version": "v1.2.0",
-  "description": "FormVueLatte Lookup plugin",
-  "main": "dist/formvuelatte-plugin-lookup.cjs.js",
+  "name": "@formvuelate/plugin-lookup",
+  "version": "1.2.0",
+  "description": "FormVueLate Lookup plugin",
+  "main": "dist/formvuelate-plugin-lookup.cjs.js",
   "private": false,
   "publishConfig": {
     "access": "public"
   },
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@github.com/vuelidate/formvuelatte-plugin-lookup.git"
+    "url": "git+ssh://git@github.com/formvuelate/formvuelate-plugin-lookup.git"
   },
   "author": {
     "name": "Marina Mosti",
@@ -34,14 +34,14 @@
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-standard": "^4.0.1",
-    "formvuelatte": "^2.0.0-beta.2",
+    "formvuelate": "^2.0.0-beta.3",
     "jest": "^26.0.1",
     "rollit": "^0.0.9",
     "vue": "^3.0.0-beta.12",
     "vue-jest": "^5.0.0-alpha.0"
   },
   "peerDependencies": {
-    "formvuelatte": "^2.0.0-beta.2",
+    "formvuelate": "^2.0.0-beta.3",
     "vue": "^3.0.0-beta.12"
   },
   "files": [
@@ -49,10 +49,10 @@
     "dist/*"
   ],
   "bugs": {
-    "url": "https://github.com/vuelidate/formvuelatte-plugin-lookup/issues"
+    "url": "https://github.com/formvuelate/formvuelate-plugin-lookup/issues"
   },
-  "homepage": "https://github.com/vuelidate/formvuelatte-plugin-lookup#readme",
-  "module": "dist/formvuelatte-plugin-lookup.es.js",
-  "unpkg": "dist/formvuelatte-plugin-lookup.js",
-  "browser": "dist/formvuelatte-plugin-lookup.es.js"
+  "homepage": "https://github.com/formvuelate/formvuelate-plugin-lookup#readme",
+  "module": "dist/formvuelate-plugin-lookup.es.js",
+  "unpkg": "dist/formvuelate-plugin-lookup.js",
+  "browser": "dist/formvuelate-plugin-lookup.es.js"
 }
