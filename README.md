@@ -1,8 +1,8 @@
-# @formvuelatte/plugin-lookup
+# @formvuelate/plugin-lookup
 
-Lookup plugin for FormVueLatte
+Lookup plugin for FormVueLate
 
-For full documentation check out [FormVueLatte's docs](http://formvuelatte-next.netlify.app/)
+For full documentation check out [FormVueLate's docs](http://formvuelate.js.org/)
 
 ## Quick example
 
@@ -19,7 +19,7 @@ For full documentation check out [FormVueLatte's docs](http://formvuelatte-next.
 </template>
 
 <script>
-import { SchemaFormFactory } from 'formvuelatte'
+import { SchemaFormFactory } from 'formvuelate'
 import LookupPlugin from '@/plugins/LookupPlugin'
 
 import SCHEMA from 'some/schema.json'
