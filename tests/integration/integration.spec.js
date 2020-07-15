@@ -1,5 +1,5 @@
 import LookupPlugin from '../../src/index.js'
-import { SchemaFormFactory } from 'formvuelatte'
+import { SchemaFormFactory } from 'formvuelate'
 import { mount } from '@vue/test-utils'
 import { markRaw } from 'vue'
 
