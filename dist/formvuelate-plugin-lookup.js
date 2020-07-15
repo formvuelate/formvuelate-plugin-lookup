@@ -1,12 +1,14 @@
 /**
- * @formvuelatte/plugin-lookup v1.1.2
+ * @formvuelate/plugin-lookup v1.2.0
  * (c) 2020 Marina Mosti <marina@mosti.com.mx>
  * @license MIT
  */
 
-'use strict';
-
-Object.defineProperty(exports, '__esModule', { value: true });
+(function (global, factory) {
+	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
+	typeof define === 'function' && define.amd ? define(['exports'], factory) :
+	(factory((global['@formvuelate/pluginLookup'] = {})));
+}(this, (function (exports) { 'use strict';
 
 // Make a map and return a function for checking if a key
 // is in that map.
@@ -3449,3 +3451,7 @@ var replacePropInElement = function (el, prop, replacement) {
 
 exports['default'] = LookupPlugin;
 exports.mapElementsInSchema = mapElementsInSchema;
+
+Object.defineProperty(exports, '__esModule', { value: true });
+
+})));
