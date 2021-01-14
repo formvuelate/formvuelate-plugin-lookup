@@ -14,8 +14,8 @@ export default function LookupPlugin ({ mapComponents = {}, mapProps = null }) {
     const replacedSchema = ref()
 
     watchEffect(() => {
-      replacedSchema.value = mapProperties(parsedSchema.value, mapProps)
-      replacedSchema.value = mapComps(replacedSchema.value, mapComponents)
+      const schemaWithRemappedProps = mapProperties(parsedSchema.value, mapProps)
+      replacedSchema.value = mapComps(schemaWithRemappedProps, mapComponents)
     })
 
     return {
