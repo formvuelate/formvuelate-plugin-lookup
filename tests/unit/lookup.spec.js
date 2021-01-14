@@ -1,4 +1,4 @@
-import { computed, nextTick } from 'vue'
+import { computed, ref } from 'vue'
 import LookupPlugin, { mapElementsInSchema } from '../../src/index.js'
 
 const rawSchema = [
@@ -201,5 +201,47 @@ describe('Lookup Plugin', () => {
         })
       })
     })
+  })
+
+  it('preserves reactivty in computed schemas', () => {
+    const toggle = ref('A')
+    const computedSchema = computed(() => {
+      return toggle.value === 'A'
+        ? [
+          [
+            {
+              model: 'A',
+              component: 'text',
+              label: 'A'
+            }
+          ]
+        ]
+        : [
+          [
+            {
+              model: 'B',
+              component: 'text',
+              label: 'B'
+            }
+          ]
+        ]
+    })
+
+    const lookup = LookupPlugin({
+      mapComponents: {
+        text: 'FormText'
+      }
+    })
+    const { parsedSchema } = lookup({ parsedSchema: computedSchema })
+
+    expect(parsedSchema.value).toEqual([[
+      { component: 'FormText', label: 'A', model: 'A' }
+    ]])
+
+    toggle.value = 'B'
+
+    expect(parsedSchema.value).toEqual([[
+      { component: 'FormText', label: 'B', model: 'B' }
+    ]])
   })
 })
