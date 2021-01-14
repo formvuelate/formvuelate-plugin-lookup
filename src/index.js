@@ -1,4 +1,4 @@
-import { computed } from 'vue'
+import { watchEffect, ref } from 'vue'
 
 /**
  * LookupPlugin
@@ -11,13 +11,16 @@ import { computed } from 'vue'
 export default function LookupPlugin ({ mapComponents = {}, mapProps = null }) {
   return function (baseReturns) {
     const { parsedSchema } = baseReturns
+    const replacedSchema = ref()
 
-    let replacedSchema = mapProperties(parsedSchema.value, mapProps)
-    replacedSchema = mapComps(replacedSchema, mapComponents)
+    watchEffect(() => {
+      replacedSchema.value = mapProperties(parsedSchema.value, mapProps)
+      replacedSchema.value = mapComps(replacedSchema.value, mapComponents)
+    })
 
     return {
       ...baseReturns,
-      parsedSchema: computed(() => replacedSchema)
+      parsedSchema: replacedSchema
     }
   }
 }
