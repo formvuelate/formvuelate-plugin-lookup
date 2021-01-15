@@ -12,12 +12,15 @@ export default function LookupPlugin ({ mapComponents = {}, mapProps = null }) {
   return function (baseReturns) {
     const { parsedSchema } = baseReturns
 
-    let replacedSchema = mapProperties(parsedSchema.value, mapProps)
-    replacedSchema = mapComps(replacedSchema, mapComponents)
+    const replacedSchema = computed(() => {
+      const schemaWithRemappedProps = mapProperties(parsedSchema.value, mapProps)
+
+      return mapComps(schemaWithRemappedProps, mapComponents)
+    })
 
     return {
       ...baseReturns,
-      parsedSchema: computed(() => replacedSchema)
+      parsedSchema: replacedSchema
     }
   }
 }

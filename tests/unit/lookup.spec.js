@@ -1,4 +1,4 @@
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import LookupPlugin, { mapElementsInSchema } from '../../src/index.js'
 
 const rawSchema = [
@@ -153,14 +153,18 @@ describe('Lookup Plugin', () => {
     })
 
     describe('warnings', () => {
-      it('throws a console warning if prop is not found', () => {
+      it('throws a console warning if prop is not found', async () => {
         const lookup = LookupPlugin({
           mapProps: {
             foo: 'bar'
           }
         })
 
-        lookup({ parsedSchema: schema })
+        const { parsedSchema } = lookup({ parsedSchema: schema })
+
+        // Force computed property to execute so that warning are fired
+        // eslint-disable-next-line
+        parsedSchema.value
 
         expect(warn).toHaveBeenCalledTimes(3)
         expect(warn).toHaveBeenCalledWith(expect.stringContaining('property "foo" not found'), expect.anything())
@@ -197,5 +201,47 @@ describe('Lookup Plugin', () => {
         })
       })
     })
+  })
+
+  it('preserves reactivty in computed schemas', () => {
+    const toggle = ref('A')
+    const computedSchema = computed(() => {
+      return toggle.value === 'A'
+        ? [
+          [
+            {
+              model: 'A',
+              component: 'text',
+              label: 'A'
+            }
+          ]
+        ]
+        : [
+          [
+            {
+              model: 'B',
+              component: 'text',
+              label: 'B'
+            }
+          ]
+        ]
+    })
+
+    const lookup = LookupPlugin({
+      mapComponents: {
+        text: 'FormText'
+      }
+    })
+    const { parsedSchema } = lookup({ parsedSchema: computedSchema })
+
+    expect(parsedSchema.value).toEqual([[
+      { component: 'FormText', label: 'A', model: 'A' }
+    ]])
+
+    toggle.value = 'B'
+
+    expect(parsedSchema.value).toEqual([[
+      { component: 'FormText', label: 'B', model: 'B' }
+    ]])
   })
 })
