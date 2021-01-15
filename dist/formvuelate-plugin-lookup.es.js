@@ -1,6 +1,6 @@
 /**
- * @formvuelate/plugin-lookup v1.2.0
- * (c) 2020 Marina Mosti <marina@mosti.com.mx>
+ * @formvuelate/plugin-lookup v1.2.1
+ * (c) 2021 Marina Mosti <marina@mosti.com.mx>
  * @license MIT
  */
 
@@ -3316,11 +3316,14 @@ function LookupPlugin (ref) {
   return function (baseReturns) {
     var parsedSchema = baseReturns.parsedSchema;
 
-    var replacedSchema = mapProperties(parsedSchema.value, mapProps);
-    replacedSchema = mapComps(replacedSchema, mapComponents);
+    var replacedSchema = computed$$1(function () {
+      var schemaWithRemappedProps = mapProperties(parsedSchema.value, mapProps);
+
+      return mapComps(schemaWithRemappedProps, mapComponents)
+    });
 
     return Object.assign({}, baseReturns,
-      {parsedSchema: computed$$1(function () { return replacedSchema; })})
+      {parsedSchema: replacedSchema})
   }
 }
 
