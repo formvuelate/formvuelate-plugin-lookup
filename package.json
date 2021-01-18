@@ -1,6 +1,6 @@
 {
   "name": "@formvuelate/plugin-lookup",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "description": "FormVueLate Lookup plugin",
   "main": "dist/formvuelate-plugin-lookup.cjs.js",
   "private": false,
@@ -17,7 +17,7 @@
   },
   "license": "MIT",
   "scripts": {
-    "build": "rollit",
+    "build": "rollit --external vue",
     "test": "yarn test:unit",
     "test:unit": "jest --coverage",
     "test:unit:watch": "yarn test:unit --watch",
