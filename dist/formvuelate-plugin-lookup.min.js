@@ -1,5 +1,5 @@
 /**
- * @formvuelate/plugin-lookup v1.2.3
+ * @formvuelate/plugin-lookup v2.0.0
  * (c) 2021 Marina Mosti <marina@mosti.com.mx>
  * @license MIT
  */
