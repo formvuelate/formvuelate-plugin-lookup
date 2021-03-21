@@ -9,7 +9,7 @@ const FormText = {
   props: ['label', 'modelValue']
 }
 
-const SchemaWrapper = (factory, schema, formModel = {}) => {
+const SchemaWrapper = (factory, schema) => {
   return {
     template: `
       <Factory :schema="schemaRef" />
@@ -17,6 +17,7 @@ const SchemaWrapper = (factory, schema, formModel = {}) => {
     components: { Factory: factory },
     setup () {
       const schemaRef = ref(schema)
+      const formModel = ref({})
       useSchemaForm(formModel)
 
       return {
