@@ -1,12 +1,30 @@
 import LookupPlugin from '../../src/index.js'
-import { SchemaFormFactory } from 'formvuelate'
+import { SchemaFormFactory, useSchemaForm } from 'formvuelate'
 import { mount } from '@vue/test-utils'
-import { markRaw } from 'vue'
+import { markRaw, ref } from 'vue'
 
 const FormText = {
   template: '<input/>',
   emits: ['update:modelValue'],
   props: ['label', 'modelValue']
+}
+
+const SchemaWrapper = (factory, schema) => {
+  return {
+    template: `
+      <Factory :schema="schemaRef" />
+    `,
+    components: { Factory: factory },
+    setup () {
+      const schemaRef = ref(schema)
+      const formModel = ref({})
+      useSchemaForm(formModel)
+
+      return {
+        schemaRef
+      }
+    }
+  }
 }
 
 markRaw(FormText)
@@ -45,9 +63,7 @@ describe('FVL integration', () => {
         })
       ])
 
-      const wrapper = mount(factory, {
-        props: { schema, modelValue: {} }
-      })
+      const wrapper = mount(SchemaWrapper(factory, schema))
 
       expect(wrapper.findAllComponents(FormText)).toHaveLength(3)
       expect(wrapper.findAllComponents(FormText)[0].vm.label).toEqual('First Name')
@@ -81,9 +97,7 @@ describe('with object schema', () => {
       })
     ])
 
-    const wrapper = mount(factory, {
-      props: { schema, modelValue: {} }
-    })
+    const wrapper = mount(SchemaWrapper(factory, schema))
 
     expect(wrapper.findAllComponents(FormText)).toHaveLength(2)
     expect(wrapper.findAllComponents(FormText)[0].vm.label).toEqual('First Name')
