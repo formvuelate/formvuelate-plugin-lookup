@@ -72,6 +72,23 @@ describe('Lookup Plugin', () => {
       })
     })
 
+    it('can map without deleting the original property', () => {
+      const lookup = LookupPlugin({
+        mapProps: {
+          label: 'tag'
+        },
+        preserveMappedProps: true
+      })
+
+      const { parsedSchema } = lookup({ parsedSchema: schema })
+
+      mapElementsInSchema(parsedSchema.value, el => {
+        expect('tag' in el).toEqual(true)
+        expect('label' in el).toEqual(true)
+        expect(el.tag).toEqual(el.label)
+      })
+    })
+
     it('can receive a function to create the mapping', () => {
       const rawSchema = [
         [
@@ -203,7 +220,7 @@ describe('Lookup Plugin', () => {
     })
   })
 
-  it('preserves reactivty in computed schemas', () => {
+  it('preserves reactivity in computed schemas', () => {
     const toggle = ref('A')
     const computedSchema = computed(() => {
       return toggle.value === 'A'
