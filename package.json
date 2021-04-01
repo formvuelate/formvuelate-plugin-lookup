@@ -37,7 +37,7 @@
     "formvuelate": "^3.0.0",
     "jest": "^26.0.1",
     "rollit": "^0.0.9",
-    "vue": "^3.0.6",
+    "vue": "^3.0.0",
     "vue-jest": "^5.0.0-alpha.0"
   },
   "peerDependencies": {
