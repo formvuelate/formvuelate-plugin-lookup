@@ -1,5 +1,5 @@
 /**
- * @formvuelate/plugin-lookup v2.0.0
+ * @formvuelate/plugin-lookup v2.1.0
  * (c) 2021 Marina Mosti <marina@mosti.com.mx>
  * @license MIT
  */
@@ -15,18 +15,20 @@ var vue = require('vue');
  * @param {Object} configuration
  * @param {Object|Function} configuration.mapComponents - Key value pair of component mapping or a function that returns it
  * @param {Object|Function} configuration.mapProps - Key value pair of prop mapping or a function that returns it
+ * @param {Boolean} configuration.preserveMappedProps
  *
  * @returns {Function}
  */
 function LookupPlugin (ref) {
   var mapComponents = ref.mapComponents; if ( mapComponents === void 0 ) mapComponents = {};
   var mapProps = ref.mapProps; if ( mapProps === void 0 ) mapProps = null;
+  var preserveMappedProps = ref.preserveMappedProps; if ( preserveMappedProps === void 0 ) preserveMappedProps = false;
 
   return function (baseReturns) {
     var parsedSchema = baseReturns.parsedSchema;
 
     var replacedSchema = vue.computed(function () {
-      var schemaWithRemappedProps = mapProperties(parsedSchema.value, mapProps);
+      var schemaWithRemappedProps = mapProperties(parsedSchema.value, mapProps, { preserveMappedProps: preserveMappedProps });
 
       return mapComps(schemaWithRemappedProps, mapComponents)
     });
@@ -70,17 +72,19 @@ var mapComps = function (schema, mapComponents) {
  *
  * @returns {Array}
  */
-var mapProperties = function (schema, mapProps) {
+var mapProperties = function (schema, mapProps, config) {
+  if ( config === void 0 ) config = {};
+
   if (!mapProps || !['object', 'function'].includes(typeof mapProps)) { return schema }
 
   if (typeof mapProps === 'function') {
-    return mapPropertiesWithUserFunction(schema, mapProps)
+    return mapPropertiesWithUserFunction(schema, mapProps, config)
   }
 
   var schemaCopy;
   var loop = function ( prop ) {
     schemaCopy = mapElementsInSchema(schema, function (el) {
-      return replacePropInElement(el, prop, mapProps[prop])
+      return replacePropInElement(el, prop, mapProps[prop], config)
     });
   };
 
@@ -96,12 +100,17 @@ var mapProperties = function (schema, mapProps) {
  *
  * @returns {Array} - Parsed schema
  */
-var mapPropertiesWithUserFunction = function (schema, fn) {
+var mapPropertiesWithUserFunction = function (schema, fn, config) {
+  if ( config === void 0 ) config = {};
+
   var mapPropsForElement = function (el, fn) {
     var map = fn(el);
     for (var prop in map) {
       el = replacePropInElement(
-        el, prop, map[prop]
+        el,
+        prop,
+        map[prop],
+        config
       );
     }
 
@@ -118,10 +127,15 @@ var mapPropertiesWithUserFunction = function (schema, fn) {
  * @param {Object} el - The element to replace props in
  * @param {String} prop - The prop to replace or fn to pick the prop
  * @param {String|Function|Boolean} replacement - The replacement for the prop, a function that returns it or the boolean "false" to delete it
+ * @param {Object} [config={}]
+ * @param {Boolean} [config.preserveMappedProps=false]
  *
  * @returns {Object} - The replaced element
  */
-var replacePropInElement = function (el, prop, replacement) {
+var replacePropInElement = function (el, prop, replacement, ref) {
+  if ( ref === void 0 ) ref = {};
+  var preserveMappedProps = ref.preserveMappedProps; if ( preserveMappedProps === void 0 ) preserveMappedProps = false;
+
   var propReplacement = replacement;
   if (typeof replacement === 'function') {
     // If replacement is a function, call it to get
@@ -144,7 +158,9 @@ var replacePropInElement = function (el, prop, replacement) {
   var originalValue = el[prop];
   var elementCopy = Object.assign({}, el);
 
-  delete elementCopy[prop];
+  if (propReplacement === false || !preserveMappedProps) {
+    delete elementCopy[prop];
+  }
 
   if (propReplacement === false) {
     return elementCopy
