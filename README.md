@@ -2,56 +2,6 @@
 
 Lookup plugin for FormVueLate
 
-For full documentation check out [FormVueLate's docs](http://formvuelate.js.org/)
+# Deprecated
 
-## Quick example
-
-```html
-<template>
-  <div id="app">
-    <SchemaFormWithPlugin
-      :schema="schema"
-      v-model="formData"
-    />
-
-    <pre>{{ formData }}</pre>
-  </div>
-</template>
-
-<script>
-import { SchemaFormFactory } from 'formvuelate'
-import LookupPlugin from '@/plugins/LookupPlugin'
-
-import SCHEMA from 'some/schema.json'
-
-const SchemaFormWithPlugin = SchemaFormFactory([
-  LookupPlugin({
-    mapComponents: {
-      string: 'FormText',
-      array: 'FormSelect',
-      boolean: 'FormCheckbox',
-      SchemaForm: 'SchemaFormWithPlugin'
-    },
-    mapProps: {
-      type: 'component',
-      info: 'label'
-    }
-  })
-])
-
-export default {
-  name: 'App',
-  components: {
-    SchemaFormWithPlugin
-  },
-  setup () {
-    const formData = ref({})
-
-    return {
-      schema: SCHEMA,
-      formData
-    }
-  }
-}
-</script>
-```
+This repo is now deprecated, and has been moved to a monorepo structure on [https://github.com/formvuelate/formvuelate](https://github.com/formvuelate/formvuelate)
